@@ -1,0 +1,228 @@
+<html lang="en" ng-app="test" >
+    <body ng-controller="PostCtrl">
+
+
+      <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
+      <datalist id="json-datalist"></datalist>
+      <button ng-click="test()">Submit
+      </button>
+
+      <canvas id="myCanvas" width="1280" height="768" crossOrigin="anonymous"></canvas>
+      <script src="../tjs/build/three.js"></script>
+      <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
+      <!-- from here -->
+      <script>
+      var app = angular.module('test', []);
+      var input = document.getElementById('inputajax');
+      var dataList = document.getElementById('json-datalist');
+      var camera, scene, renderer;
+      var mesh;
+      var coords;
+      var c=document.getElementById("myCanvas");
+      var postcodeInfo;
+      var lat, long;
+      app.controller('PostCtrl', function($scope, $http) {
+        $scope.select = "";
+        $scope.test = function() {
+          var val = document.getElementById('inputajax').value;
+          //alert(val);
+          $http({
+            method: 'POST',
+            url: 'init.php',
+            //datatype: 'json',
+            data: val,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          }).then(function(response) {
+            console.log(response);
+            //alert(response.data[0]);
+            //alert(response.data[16]);
+
+
+            lat = response.data[15];
+            long = response.data[16];
+
+            coords = [lat,long];
+
+            //alert(coords);
+
+            var ctx=c.getContext("2d");
+
+            var imageObj1 = new Image();
+            var imageObj2 = new Image();
+            var imageObj3 = new Image();
+            var imageObj4 = new Image();
+            var imageObj5 = new Image();
+            var imageObj6 = new Image();
+            var imageObj7 = new Image();
+            var imageObj8 = new Image();
+            var imageObj9 = new Image();
+            var imageObj10 = new Image();
+            var imageObj11 = new Image();
+            var imageObj12 = new Image();
+            var imageObj13 = new Image();
+            var imageObj14 = new Image();
+            var imageObj15 = new Image();
+
+            imageObj1.crossorigin = 'anonymous';
+            imageObj2.crossorigin = 'anonymous';
+            imageObj3.crossorigin = 'anonymous';
+            imageObj4.crossorigin = 'anonymous';
+            imageObj5.crossorigin = 'anonymous';
+            imageObj6.crossorigin = 'anonymous';
+            imageObj7.crossorigin = 'anonymous';
+            imageObj8.crossorigin = 'anonymous';
+            imageObj9.crossorigin = 'anonymous';
+            imageObj10.crossorigin = 'anonymous';
+            imageObj11.crossorigin = 'anonymous';
+            imageObj12.crossorigin = 'anonymous';
+            imageObj13.crossorigin = 'anonymous';
+            imageObj14.crossorigin = 'anonymous';
+            imageObj15.crossorigin = 'anonymous';
+
+            imageObj1.onload = function() {ctx.drawImage(imageObj1, 0, 0);}
+            imageObj2.onload = function() {ctx.drawImage(imageObj2, 256, 0);}
+            imageObj3.onload = function() {ctx.drawImage(imageObj3, 512, 0);}
+            imageObj4.onload = function() {ctx.drawImage(imageObj4, 768, 0);}
+            imageObj5.onload = function() {ctx.drawImage(imageObj5, 1024, 0);}
+            imageObj6.onload = function() {ctx.drawImage(imageObj6, 0, 256);}
+            imageObj7.onload = function() {ctx.drawImage(imageObj7, 256, 256);}
+            imageObj8.onload = function() {ctx.drawImage(imageObj8, 512, 256);}
+            imageObj9.onload = function() {ctx.drawImage(imageObj9, 768, 256);}
+            imageObj10.onload = function() {ctx.drawImage(imageObj10, 1024, 256);}
+            imageObj11.onload = function() {ctx.drawImage(imageObj11, 0, 512);}
+            imageObj12.onload = function() {ctx.drawImage(imageObj12, 256, 512);}
+            imageObj13.onload = function() {ctx.drawImage(imageObj13, 512, 512);}
+            imageObj14.onload = function() {ctx.drawImage(imageObj14, 768, 512);}
+            imageObj15.onload = function() {
+              ctx.drawImage(imageObj15, 1024, 512);
+              init();
+              //console.log('past init');
+              animate();
+            }
+
+            imageObj1.src = response.data[0];
+            imageObj2.src = response.data[1];
+            imageObj3.src = response.data[2];
+            imageObj4.src = response.data[3];
+            imageObj5.src = response.data[4];
+            imageObj6.src = response.data[5];
+            imageObj7.src = response.data[6];
+            imageObj8.src = response.data[7];
+            imageObj9.src = response.data[8];
+            imageObj10.src = response.data[9];
+            imageObj11.src = response.data[10];
+            imageObj12.src = response.data[11];
+            imageObj13.src = response.data[12];
+            imageObj14.src = response.data[13];
+            imageObj15.src = response.data[14];
+
+            //console.log(c.toDataURL("image/png"));
+          })
+        }
+
+        function getPost(str) {
+          //var postJSON = 'https://api.postcodes.io/postcodes/EX/autocomplete'
+          var postJSON = 'https://api.postcodes.io/postcodes/' + str + '/autocomplete'
+          //alert(postJSON);
+          $http.get(postJSON)
+            .then(function(res) {
+              $scope.postcodes = res.data.result;
+
+              for (i = 0; i<$scope.postcodes.length;i++) {
+                var option = document.createElement('option');
+                option.value = $scope.postcodes[i];
+                dataList.appendChild(option);
+              }
+            });
+        }
+
+
+        function init() {
+          var img = c.toDataURL("image/png");
+
+          getHeights();
+
+          //alert(postcodeInfo);
+
+          camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
+          camera.position.z = 800;
+          scene = new THREE.Scene();
+          var texture = new THREE.TextureLoader().load( img );
+          var geometry = new THREE.BoxBufferGeometry( 1280, 768, 20 );
+          var material = new THREE.MeshBasicMaterial( { map: texture } );
+          group = new THREE.Object3D();
+          mesh = new THREE.Mesh( geometry, material );
+
+          /*
+          var geometry = new THREE.BoxBufferGeometry( 10, 10, 200 );
+          testmesh = new THREE.Mesh(geometry);
+          testmesh.position.set(640,0,100);
+          group.add(mesh);
+          group.add(testmesh);
+          */
+
+          scene.add( group );
+          renderer = new THREE.WebGLRenderer({ alpha: true });
+          renderer.setPixelRatio( window.devicePixelRatio );
+          renderer.setSize( window.innerWidth, window.innerHeight );
+          document.body.appendChild( renderer.domElement );
+          window.addEventListener( 'resize', onWindowResize, false );
+          var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+        }
+        function onWindowResize() {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize( window.innerWidth, window.innerHeight );
+        }
+        function animate() {
+          requestAnimationFrame( animate );
+          mesh.rotation.x += 0.000;
+          mesh.rotation.y += 0.00;
+          renderer.render( scene, camera );
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize( window.innerWidth, window.innerHeight );
+        }
+        function getHeights() {
+          $http({
+            method: 'POST',
+            url: 'query.php',
+            //datatype: 'json',
+            data: coords,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          }).then(function(res) {
+            postcodeInfo = res.data;
+            var longConst = 4967;
+            var latConst = 9309;
+            group.add(mesh);
+
+
+            for (var i = 0; i < postcodeInfo.length; i++) {
+              var geometry = new THREE.BoxBufferGeometry( 2, 2, postcodeInfo[i]["Total"] );
+              bar = new THREE.Mesh(geometry);
+              bar.position.set(((long - postcodeInfo[i]["Longitude"]) * longConst),((lat - postcodeInfo[i]["Latitude"]) * latConst), (postcodeInfo[i]["Total"] / 2));
+              bar.material.color.setHex( 0x9900FF );
+              bar.material.transparent = true;
+              bar.material.opacity = 0.3;
+              group.add(bar);
+            }
+
+            //console.log(postcodeInfo[0]['ID']);
+          });
+        }
+
+        // option #1 with ng-change="change()"
+        $scope.change = function(str) {
+          document.getElementById('json-datalist').innerHTML = '';
+          getPost(str);
+        }
+
+      });
+
+      </script>
+
+
+    </body>
+</html>
