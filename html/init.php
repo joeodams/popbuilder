@@ -16,17 +16,17 @@ $latr = ($lat * pi() )/180;
 //Code for lat long to tile location conversion
 $zoom = 13;
 $n = 2 ** $zoom;
-//$xtile = round($n * (($long + 180) / 360),0);
-//$ytile = round($n * (1 - (log(tan($latr) + (1/cos($latr))) / pi())) / 2,0);
-$xtile = round($n * (($long + 180) / 360));
-$ytile = round($n * (1 - (log(tan($latr) + (1/cos($latr))) / pi())) / 2);
 
-/*
-echo ' ';
-echo $xtile;
-echo ' ';
-echo $ytile;
-*/
+$xraw = $n * (($long + 180) / 360);
+$yraw = $n * (1 - (log(tan($latr) + (1/cos($latr))) / pi())) / 2;
+
+$xtile = round($xraw);
+$ytile = round($yraw);
+
+//These lines calculate the offset caused by rounding the co-ordinates of the target postcode to a whole tile (in degrees)
+$xoffset = ($xraw - $xtile) * 0.0446;
+$yoffset = ($yraw - $ytile) * 0.027;
+
 
 //$xlocs = array($xtile - 2, $xtile - 1, $xtile, $xtile + 1, $xtile + 2);
 $xlocs = array($xtile - 3, $xtile - 2, $xtile - 1, $xtile, $xtile + 1);
@@ -57,6 +57,9 @@ foreach ($xlocs as $xvalue) {
 
 array_push($pngnames,$lat);
 array_push($pngnames,$long);
+
+array_push($pngnames,$xoffset);
+array_push($pngnames,$yoffset);
 
 echo json_encode(array_values($pngnames));
 

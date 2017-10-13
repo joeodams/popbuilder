@@ -23,6 +23,8 @@
       var c=document.getElementById("myCanvas");
       var postcodeInfo;
       var lat, long;
+      var xoffset, yoffset;
+      var pngNames = [];
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
         $scope.test = function() {
@@ -39,9 +41,15 @@
             //alert(response.data[0]);
             //alert(response.data[16]);
 
+            for (var i = 0; i < 15; i++) {
+              pngNames.push(response.data[i])
+            }
+
 
             lat = response.data[15];
             long = response.data[16];
+            xoffset = response.data[17];
+            yoffset = response.data[18];
 
             coords = [lat,long];
 
@@ -102,21 +110,21 @@
               animate();
             }
 
-            imageObj1.src = response.data[0];
-            imageObj2.src = response.data[1];
-            imageObj3.src = response.data[2];
-            imageObj4.src = response.data[3];
-            imageObj5.src = response.data[4];
-            imageObj6.src = response.data[5];
-            imageObj7.src = response.data[6];
-            imageObj8.src = response.data[7];
-            imageObj9.src = response.data[8];
-            imageObj10.src = response.data[9];
-            imageObj11.src = response.data[10];
-            imageObj12.src = response.data[11];
-            imageObj13.src = response.data[12];
-            imageObj14.src = response.data[13];
-            imageObj15.src = response.data[14];
+            imageObj1.src = pngNames[0];
+            imageObj2.src = pngNames[1];
+            imageObj3.src = pngNames[2];
+            imageObj4.src = pngNames[3];
+            imageObj5.src = pngNames[4];
+            imageObj6.src = pngNames[5];
+            imageObj7.src = pngNames[6];
+            imageObj8.src = pngNames[7];
+            imageObj9.src = pngNames[8];
+            imageObj10.src = pngNames[9];
+            imageObj11.src = pngNames[10];
+            imageObj12.src = pngNames[11];
+            imageObj13.src = pngNames[12];
+            imageObj14.src = pngNames[13];
+            imageObj15.src = pngNames[14];
 
             //console.log(c.toDataURL("image/png"));
           })
@@ -170,6 +178,9 @@
           document.body.appendChild( renderer.domElement );
           window.addEventListener( 'resize', onWindowResize, false );
           var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+
+          finish();
+
         }
         function onWindowResize() {
           camera.aspect = window.innerWidth / window.innerHeight;
@@ -197,12 +208,13 @@
             var longConst = 4967;
             var latConst = 9309;
             group.add(mesh);
-
+            alert(xoffset + "," + yoffset);
 
             for (var i = 0; i < postcodeInfo.length; i++) {
               var geometry = new THREE.BoxBufferGeometry( 2, 2, postcodeInfo[i]["Total"] );
               bar = new THREE.Mesh(geometry);
-              bar.position.set(((long - postcodeInfo[i]["Longitude"]) * longConst),((lat - postcodeInfo[i]["Latitude"]) * latConst), (postcodeInfo[i]["Total"] / 2));
+              //bar.position.set((((long - postcodeInfo[i]["Longitude"]) * longConst) + (xoffset * longConst)),(((lat - postcodeInfo[i]["Latitude"]) * latConst) + (yoffset * latConst)), (postcodeInfo[i]["Total"] / 2));
+              bar.position.set((((postcodeInfo[i]["Longitude"] - long) * longConst)),(((postcodeInfo[i]["Latitude"] - lat) * latConst)), (postcodeInfo[i]["Total"] / 2));
               bar.material.color.setHex( 0x9900FF );
               bar.material.transparent = true;
               bar.material.opacity = 0.3;
@@ -210,6 +222,17 @@
             }
 
             //console.log(postcodeInfo[0]['ID']);
+          });
+        }
+        function finish() {
+          $http({
+            method: 'POST',
+            url: 'cleanup.php',
+            //datatype: 'json',
+            data: pngNames,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          }).then(function(res) {
+            alert(res.data);
           });
         }
 
