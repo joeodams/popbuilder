@@ -24,9 +24,24 @@ $xtile = round($xraw);
 $ytile = round($yraw);
 
 //These lines calculate the offset caused by rounding the co-ordinates of the target postcode to a whole tile (in degrees)
-$xoffset = ($xraw - $xtile) * 0.0446;
-$yoffset = ($yraw - $ytile) * 0.027;
+//$xoffset = ($xraw - $xtile) * 0.0446;
+//$yoffset = ($yraw - $ytile) * 0.027;
+//DEGREES VS RADIANS
 
+$xbottom = ((($xtile - 3) / $n ) * 360) - 180;
+$ybottom =  atan( sinh( pi() - ((($ytile - 2) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xtop = ((($xtile + 2) / $n ) * 360) - 180;
+$ytop =  atan( sinh( pi() - ((($ytile + 1) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xorigin = ((($xtile - 0.5) / $n ) * 360) - 180;
+$yorigin =  atan( sinh( pi() - ((($ytile - 0.5) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xspan = $xtop - $xbottom;
+$yspan = $ytop - $ybottom;
+
+$xoffset = $long - $xorigin;
+$yoffset = $lat - $yorigin;
 
 //$xlocs = array($xtile - 2, $xtile - 1, $xtile, $xtile + 1, $xtile + 2);
 $xlocs = array($xtile - 3, $xtile - 2, $xtile - 1, $xtile, $xtile + 1);
@@ -60,6 +75,17 @@ array_push($pngnames,$long);
 
 array_push($pngnames,$xoffset);
 array_push($pngnames,$yoffset);
+
+array_push($pngnames,$xspan);
+array_push($pngnames,$yspan);
+
+array_push($pngnames,$xtile);
+array_push($pngnames,$ytile);
+array_push($pngnames,$xraw);
+array_push($pngnames,$yraw);
+array_push($pngnames,$xorigin);
+array_push($pngnames,$yorigin);
+
 
 echo json_encode(array_values($pngnames));
 

@@ -23,7 +23,7 @@
       var c=document.getElementById("myCanvas");
       var postcodeInfo;
       var lat, long;
-      var xoffset, yoffset;
+      var xoffset, yoffset, xspan, yspan;
       var pngNames = [];
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
@@ -38,8 +38,6 @@
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(response) {
             console.log(response);
-            //alert(response.data[0]);
-            //alert(response.data[16]);
 
             for (var i = 0; i < 15; i++) {
               pngNames.push(response.data[i])
@@ -50,10 +48,20 @@
             long = response.data[16];
             xoffset = response.data[17];
             yoffset = response.data[18];
+            xspan = response.data[19];
+            yspan = response.data[20];
+
+            xtile = response.data[21];
+            ytile = response.data[22];
+            xraw = response.data[23];
+            yraw = response.data[24];
+            xorigin = response.data[25];
+            yorigin = response.data[26];
+
+            alert("xtile number is: " + xtile + " , xraw number is: " + xraw + " ,ytile number is: " + ytile + " ,yraw number is: " + yraw);
+            alert("xorigin is: " + xorigin + " , long is: " + long + " , yorigin is: " + yorigin + " , lat is: " + lat);
 
             coords = [lat,long];
-
-            //alert(coords);
 
             var ctx=c.getContext("2d");
 
@@ -126,7 +134,6 @@
             imageObj14.src = pngNames[13];
             imageObj15.src = pngNames[14];
 
-            //console.log(c.toDataURL("image/png"));
           })
         }
 
@@ -158,10 +165,12 @@
           camera.position.z = 800;
           scene = new THREE.Scene();
           var texture = new THREE.TextureLoader().load( img );
-          var geometry = new THREE.BoxBufferGeometry( 1280, 768, 20 );
+          //var geometry = new THREE.BoxBufferGeometry( 1280, 768, 20 );
+          var geometry = new THREE.BoxBufferGeometry( 1280, 20, 768 );
           var material = new THREE.MeshBasicMaterial( { map: texture } );
           group = new THREE.Object3D();
           mesh = new THREE.Mesh( geometry, material );
+          //group.rotation.set(new THREE.Vector3( 0, 0, Math.PI / 2));
 
           /*
           var geometry = new THREE.BoxBufferGeometry( 10, 10, 200 );
@@ -177,7 +186,10 @@
           renderer.setSize( window.innerWidth, window.innerHeight );
           document.body.appendChild( renderer.domElement );
           window.addEventListener( 'resize', onWindowResize, false );
-          var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+          //var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+          var orbit = new THREE.OrbitControls( camera );
+
+          console.log(mesh.matrix);
 
           finish();
 
@@ -205,25 +217,48 @@
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(res) {
             postcodeInfo = res.data;
-            var longConst = 4967;
-            var latConst = 9309;
+            //var longConst = 4967;
+            //var latConst = 9309;
+
+            var longConst = Math.abs(1280 / xspan);
+            var latConst = Math.abs(768 / yspan);
+
+            //alert(longConst + " " + latConst);
+            //alert(xspan + "," + yspan);
+            alert("xoffset = " + xoffset + " degrees , yoffset = " + yoffset + " degrees");
+            alert("lat = " + lat + " long = " + long);
+
+//            lat = lat;
+//            long = long;
+            lat = lat - (yoffset);
+            long = long - (xoffset);
+
+            alert("after offset correction, lat = " + lat + " long = " + long);
+
             group.add(mesh);
-            alert(xoffset + "," + yoffset);
+
+
 
             for (var i = 0; i < postcodeInfo.length; i++) {
-              var geometry = new THREE.BoxBufferGeometry( 2, 2, postcodeInfo[i]["Total"] );
+              var geometry = new THREE.BoxBufferGeometry( 2, postcodeInfo[i]["Total"], 2 );
               bar = new THREE.Mesh(geometry);
-              //bar.position.set((((long - postcodeInfo[i]["Longitude"]) * longConst) + (xoffset * longConst)),(((lat - postcodeInfo[i]["Latitude"]) * latConst) + (yoffset * latConst)), (postcodeInfo[i]["Total"] / 2));
-              bar.position.set((((postcodeInfo[i]["Longitude"] - long) * longConst)),(((postcodeInfo[i]["Latitude"] - lat) * latConst)), (postcodeInfo[i]["Total"] / 2));
+
+              var xpos = ((((postcodeInfo[i]["Longitude"] - long ) ) * longConst));
+//              var xpos = ((((postcodeInfo[i]["Longitude"] - long) ) * longConst));
+              var ypos = (postcodeInfo[i]["Total"] / 2);
+              var zpos = -((((postcodeInfo[i]["Latitude"] - lat ) ) * latConst));
+//              var zpos = -((((postcodeInfo[i]["Latitude"] - lat) ) * latConst));
+              bar.position.set(xpos, ypos, zpos);
+
               bar.material.color.setHex( 0x9900FF );
               bar.material.transparent = true;
               bar.material.opacity = 0.3;
               group.add(bar);
             }
 
-            //console.log(postcodeInfo[0]['ID']);
           });
         }
+
         function finish() {
           $http({
             method: 'POST',
@@ -232,7 +267,7 @@
             data: pngNames,
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(res) {
-            alert(res.data);
+            //alert(res.data);
           });
         }
 
