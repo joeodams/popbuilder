@@ -20,8 +20,8 @@ if ($conn->connect_error) {
 
 $sql = "SELECT pcd.Postcode, Latitude, Longitude, Total
 FROM CSV_DB.uk_postcodes AS pcd
-INNER JOIN CSV_DB.populations AS pop ON pop.Postcode = pcd.Postcode
-WHERE Latitude BETWEEN ($lat - 0.0414) AND ($lat + 0.0414) AND Longitude BETWEEN ($long - 0.12885) AND ($long + 0.12885)";
+INNER JOIN CSV_DB.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
+WHERE Latitude BETWEEN ($lat - 0.1) AND ($lat + 0.1) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
 
 
 if (!$result = $conn->query($sql)) {
