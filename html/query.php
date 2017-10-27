@@ -7,9 +7,9 @@ $lat = $coord[0];
 $long = $coord[1];
 
 $servername = "localhost";
-$username = "user1";
+$username = "root";
 //$password = "3in9h6u3kj5zvkTL";
-$dbname = "CSV_DB";
+$dbname = "geodem";
 
 // Create connection
 $conn = new mysqli($servername, $username);
@@ -19,8 +19,8 @@ if ($conn->connect_error) {
 }
 
 $sql = "SELECT pcd.Postcode, Latitude, Longitude, Total
-FROM CSV_DB.uk_postcodes AS pcd
-INNER JOIN CSV_DB.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
+FROM geodem.uk_postcodes AS pcd
+INNER JOIN geodem.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
 WHERE Latitude BETWEEN ($lat - 0.1) AND ($lat + 0.1) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
 
 

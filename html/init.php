@@ -86,6 +86,11 @@ array_push($pngnames,$yraw);
 array_push($pngnames,$xorigin);
 array_push($pngnames,$yorigin);
 
+array_push($pngnames,$xtop);
+array_push($pngnames,$ytop);
+array_push($pngnames,$xbottom);
+array_push($pngnames,$ybottom);
+
 
 echo json_encode(array_values($pngnames));
 
