@@ -232,6 +232,7 @@
 
 
             for (var i = 0; i < postcodeInfo.length; i++) {
+            //for (var i = 0; i < 10; i++) {
 
               if (postcodeInfo[i]["Latitude"] < (lat + (yspan / 2)) ) {
                 continue;
@@ -247,27 +248,84 @@
               }
 
               var barGeometry = new THREE.BoxGeometry( 2, postcodeInfo[i]["Total"], 2 );
-              //barMesh = new THREE.Mesh(barGeometry);
+              var barMaterial 	= new THREE.MeshBasicMaterial({vertexColors: true});
+              //var barMaterial 	= new THREE.MeshBasicMaterial();
+      				var barMesh	= new THREE.Mesh( barGeometry );
+
+              var rColor, gColor;
+
+              if (postcodeInfo[i]["Total"] < 150) {
+                rColor = postcodeInfo[i]["Total"] / 150;
+              }
+              else {
+                rColor = 1.0;
+              }
+
+              if (postcodeInfo[i]["Total"] < 150) {
+                gColor = 1 - (postcodeInfo[i]["Total"] / 150);
+              }
+              else {
+                gColor = 0.0;
+              }
+              //alert(postcodeInfo[i]["Total"]);
+
+              //gColor = 1 - (postcodeInfo[i]["Total"] / 150);
+
+              //alert("rColor = " + rColor * 255 + " gColor = " + gColor * 255);
+
+              //alert("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)" + " total = " + postcodeInfo[i]["Total"]);
+
+              //alert(Math.round(255 * rColor));
+
+              var barColour = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
+              //var barColour = new THREE.Color("rgb(" + 255 + "," + 0 + "," + Math.round(255 * gColor) + ")");
+              //var barColour = new THREE.Color("rgb(200,"  + 55 + "," + 0 +")");
+              //alert(barColour.r + " " + barColour.g + " " + barColour.b + " " + barColour.getHexString());
+
+              //if (i > 3000) {
+              //  var barColour = new THREE.Color("rgb(200,"  + 55 + "," + 0 +")");
+              //}
+              //else {
+              //  var barColour = new THREE.Color("rgb(55,"  + 200 + "," + 0 +")");
+              //}
+
+              barMaterial.transparent = true;
+              barMaterial.opacity = 0.6;
+
+              barMaterial.color.set(barColour);
+              barMaterial.color.setRGB(1, gColor, 0);
+              //console.log(rColor);
+
+              for ( var z = 0; z < barGeometry.faces.length; z ++ ) {
+                  barGeometry.faces[ z ].color = barMaterial.color;
+              }
+
+
+              //if (postcodeInfo[i]["Total"] > 100) {
+              //  alert(barMaterial.color.r + " " + barMaterial.color.g + " " + barMaterial.color.b + " " + barMaterial.color.getHexString() + " barGeo color: " + barGeometry.faces[0].color.getHexString());
+              //}
+
 
               var xpos = ((((postcodeInfo[i]["Longitude"] - long ) ) * longConst));
               var ypos = (postcodeInfo[i]["Total"] / 2);
               var zpos = -((((postcodeInfo[i]["Latitude"] - lat ) ) * latConst));
               barGeometry.translate(xpos,ypos,zpos);
 
-              //barMesh.material.color.setHex(0x0000FF)
-
-              mergedGeo.merge(barGeometry);
+              //mergedGeo.merge(barGeometry, barMesh);
+              mergedGeo.mergeMesh(barMesh);
+              //alert(barMesh.material.color.getHexString())
             }
 
-            var barMaterial = new THREE.MeshBasicMaterial({
-              color: 0x9900FF,
-              transparent: true,
-              opacity: 0.3
+            //var barMaterial = new THREE.MeshBasicMaterial({
+            //  color: 0x9900FF,
+            //  transparent: true,
+            //  opacity: 0.3
 
-            });
+            //});
 
             mergedGeo.computeFaceNormals();
             barGroup	= new THREE.Mesh( mergedGeo, barMaterial );
+            //barGroup = new THREE.Mesh(mergedGeo);
             barGroup.matrixAutoUpdate = false;
             barGroup.updateMatrix();
             scene.add(barGroup);
