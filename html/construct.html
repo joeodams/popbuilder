@@ -29,6 +29,11 @@
       var xoffset, yoffset, xspan, yspan;
       var xtop, ytop, xbottom, ybottom;
       var pngNames = [];
+      var raycaster = new THREE.Raycaster();
+      var mouse = new THREE.Vector2();
+      var meshes = [];
+      var mergedGeo;
+      var firstFrame;
       //var mergedGeo;
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
@@ -41,38 +46,29 @@
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(response) {
             console.log(response);
-
             for (var i = 0; i < 15; i++) {
               pngNames.push(response.data[i])
             }
-
-
             lat = response.data[15];
             long = response.data[16];
             xoffset = response.data[17];
             yoffset = response.data[18];
             xspan = response.data[19];
             yspan = response.data[20];
-
             xtile = response.data[21];
             ytile = response.data[22];
             xraw = response.data[23];
             yraw = response.data[24];
             xorigin = response.data[25];
             yorigin = response.data[26];
-
             xtop = response.data[27];
             ybottom = response.data[28];
             xbottom = response.data[29];
             ytop = response.data[30];
-
             //alert("xtile number is: " + xtile + " , xraw number is: " + xraw + " ,ytile number is: " + ytile + " ,yraw number is: " + yraw);
             //alert("xorigin is: " + xorigin + " , long is: " + long + " , yorigin is: " + yorigin + " , lat is: " + lat);
-
             coords = [lat,long];
-
             var ctx=c.getContext("2d");
-
             var imageObj1 = new Image();
             var imageObj2 = new Image();
             var imageObj3 = new Image();
@@ -88,7 +84,6 @@
             var imageObj13 = new Image();
             var imageObj14 = new Image();
             var imageObj15 = new Image();
-
             imageObj1.crossorigin = 'anonymous';
             imageObj2.crossorigin = 'anonymous';
             imageObj3.crossorigin = 'anonymous';
@@ -104,7 +99,6 @@
             imageObj13.crossorigin = 'anonymous';
             imageObj14.crossorigin = 'anonymous';
             imageObj15.crossorigin = 'anonymous';
-
             imageObj1.onload = function() {ctx.drawImage(imageObj1, 0, 0);}
             imageObj2.onload = function() {ctx.drawImage(imageObj2, 256, 0);}
             imageObj3.onload = function() {ctx.drawImage(imageObj3, 512, 0);}
@@ -122,9 +116,8 @@
             imageObj15.onload = function() {
               ctx.drawImage(imageObj15, 1024, 512);
               init();
-              animate();
+              //animate();
             }
-
             imageObj1.src = pngNames[0];
             imageObj2.src = pngNames[1];
             imageObj3.src = pngNames[2];
@@ -140,16 +133,58 @@
             imageObj13.src = pngNames[12];
             imageObj14.src = pngNames[13];
             imageObj15.src = pngNames[14];
-
           })
         }
+        function onMouseMove( event ) {
 
+        	// calculate mouse position in normalized device coordinates
+        	// (-1 to +1) for both components
+
+        	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+          //render();
+        }
+
+        function render() {
+
+        	// update the picking ray with the camera and mouse position
+        	raycaster.setFromCamera( mouse, camera );
+
+        	// calculate objects intersecting the picking ray
+        	var intersects = raycaster.intersectObjects( meshes );
+
+          //alert(intersects);
+
+          if (intersects.length > 0) {
+            //alert(intersects[0].distance.toString() + intersects[1].distance.toString());
+            //alert(intersects[0].object.material.color.getHexString());
+
+
+
+            for (var y = 0; y < intersects[0].object.geometry.faces.length; y++) {
+              intersects[0].object.geometry.faces[y].color.setHex( 0x000000 );
+            }
+
+            for (var v = 0; v < intersects[0].object.geometry.faces.length; v++) {
+              intersects[0].object.geometry.faces[v].colorsNeedUpdate = true;
+              intersects[0].object.geometry.faces[v].elementsNeedUpdates = true;
+            }
+            intersects[0].object.geometry.elementsNeedUpdate = true;
+            intersects[0].object.geometry.colorsNeedUpdate = true;
+            alert(intersects[0].object.geometry.faces[0].color.getHexString());
+            //intersects[ 0 ].object.material.color.set( 0xff0000 );
+            //alert(intersects[0].object.material.color.getHexString());
+            //intersects[0].
+          }
+
+        	renderer.render( scene, camera );
+
+        }
         function getPost(str) {
           var postJSON = 'https://api.postcodes.io/postcodes/' + str + '/autocomplete'
           $http.get(postJSON)
             .then(function(res) {
               $scope.postcodes = res.data.result;
-
               for (i = 0; i<$scope.postcodes.length;i++) {
                 var option = document.createElement('option');
                 option.value = $scope.postcodes[i];
@@ -157,32 +192,24 @@
               }
             });
         }
-
-
         function init() {
-
-
           buildModel();
-
-
           camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
           camera.position.z = 800;
           scene = new THREE.Scene();
-
-
           renderer = new THREE.WebGLRenderer({ alpha: true });
           renderer.setPixelRatio( window.devicePixelRatio );
           renderer.setSize( window.innerWidth, window.innerHeight );
           document.body.appendChild( renderer.domElement );
           window.addEventListener( 'resize', onWindowResize, false );
           var orbit = new THREE.OrbitControls( camera );
-
           //console.log(mesh.matrix);
-
           scene.background = new THREE.Color( 0x000000 );
 
-          finish();
+          window.addEventListener( 'mousemove', onMouseMove, false );
 
+          window.requestAnimationFrame(render);
+          finish();
         }
         function onWindowResize() {
           camera.aspect = window.innerWidth / window.innerHeight;
@@ -191,8 +218,39 @@
         }
         function animate() {
           requestAnimationFrame( animate );
-          //mesh.rotation.x += 0.000;
-          //mesh.rotation.y += 0.00;
+
+          var elapsedTime;
+          if (firstFrame == true) {
+            scene.scale.y = 0.1;
+            mesh.scale.y = 10;
+            //alert(firstFrame);
+            firstFrame = false;
+            elapsedTime = 0;
+          }
+
+
+          elapsedTime++;
+
+          //alert(mesh.position.x)
+
+          //camera.position.x = (mesh.position.x + 1000) * Math.cos(  elapsedTime );
+          //camera.position.z = (mesh.position.z + 1000) * Math.sin(  elapsedTime );
+          //camera.lookAt( mesh.position );
+
+          if (scene.scale.y < 1) {
+            scene.scale.y += 0.01;
+            camera.position.x += 10;
+            camera.position.y += 10;
+            camera.lookAt(mesh.position);
+          }
+
+
+          //alert(camera.position.x);
+
+
+          mesh.scale.y = 1;
+
+          //position.needsUpdate = true;
           renderer.render( scene, camera );
           camera.aspect = window.innerWidth / window.innerHeight;
           camera.updateProjectionMatrix();
@@ -205,35 +263,25 @@
             data: coords,
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(res) {
-
-            var mergedGeo	= new THREE.Geometry();
-
+            mergedGeo	= new THREE.Geometry();
             var img = c.toDataURL("image/png");
             var texture = new THREE.TextureLoader().load( img );
             var geometry = new THREE.BoxBufferGeometry( 1280, 20, 768 );
             var material = new THREE.MeshBasicMaterial( { map: texture } );
             group = new THREE.Object3D();
             mesh = new THREE.Mesh( geometry, material );
-
             scene.add( group );
-
-
             postcodeInfo = res.data;
-
             var longConst = Math.abs(1280 / xspan);
             var latConst = Math.abs(768 / yspan);
             lat = lat - (yoffset);
             long = long - (xoffset);
-
             group.add(mesh);
 
             alert(postcodeInfo.length);
             //alert(mergedGeo);
-
-
             for (var i = 0; i < postcodeInfo.length; i++) {
             //for (var i = 0; i < 10; i++) {
-
               if (postcodeInfo[i]["Latitude"] < (lat + (yspan / 2)) ) {
                 continue;
               }
@@ -246,82 +294,45 @@
               if (postcodeInfo[i]["Longitude"] < (long - (xspan / 2)) ) {
                 continue;
               }
-
               var barGeometry = new THREE.BoxGeometry( 2, postcodeInfo[i]["Total"], 2 );
-              var barMaterial 	= new THREE.MeshBasicMaterial({vertexColors: true});
+              var barMaterial 	= new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
               //var barMaterial 	= new THREE.MeshBasicMaterial();
       				var barMesh	= new THREE.Mesh( barGeometry );
-
               var rColor, gColor;
-
               if (postcodeInfo[i]["Total"] < 150) {
                 rColor = postcodeInfo[i]["Total"] / 150;
               }
               else {
                 rColor = 1.0;
               }
-
               if (postcodeInfo[i]["Total"] < 150) {
                 gColor = 1 - (postcodeInfo[i]["Total"] / 150);
               }
               else {
                 gColor = 0.0;
               }
-              //alert(postcodeInfo[i]["Total"]);
-
-              //gColor = 1 - (postcodeInfo[i]["Total"] / 150);
-
-              //alert("rColor = " + rColor * 255 + " gColor = " + gColor * 255);
-
-              //alert("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)" + " total = " + postcodeInfo[i]["Total"]);
-
-              //alert(Math.round(255 * rColor));
 
               var barColour = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
-              //var barColour = new THREE.Color("rgb(" + 255 + "," + 0 + "," + Math.round(255 * gColor) + ")");
-              //var barColour = new THREE.Color("rgb(200,"  + 55 + "," + 0 +")");
-              //alert(barColour.r + " " + barColour.g + " " + barColour.b + " " + barColour.getHexString());
-
-              //if (i > 3000) {
-              //  var barColour = new THREE.Color("rgb(200,"  + 55 + "," + 0 +")");
-              //}
-              //else {
-              //  var barColour = new THREE.Color("rgb(55,"  + 200 + "," + 0 +")");
-              //}
 
               barMaterial.transparent = true;
               barMaterial.opacity = 0.6;
-
               barMaterial.color.set(barColour);
               barMaterial.color.setRGB(1, gColor, 0);
-              //console.log(rColor);
 
               for ( var z = 0; z < barGeometry.faces.length; z ++ ) {
                   barGeometry.faces[ z ].color = barMaterial.color;
               }
-
-
-              //if (postcodeInfo[i]["Total"] > 100) {
-              //  alert(barMaterial.color.r + " " + barMaterial.color.g + " " + barMaterial.color.b + " " + barMaterial.color.getHexString() + " barGeo color: " + barGeometry.faces[0].color.getHexString());
-              //}
-
 
               var xpos = ((((postcodeInfo[i]["Longitude"] - long ) ) * longConst));
               var ypos = (postcodeInfo[i]["Total"] / 2);
               var zpos = -((((postcodeInfo[i]["Latitude"] - lat ) ) * latConst));
               barGeometry.translate(xpos,ypos,zpos);
 
-              //mergedGeo.merge(barGeometry, barMesh);
+              meshes.push(barMesh);
+
               mergedGeo.mergeMesh(barMesh);
-              //alert(barMesh.material.color.getHexString())
+
             }
-
-            //var barMaterial = new THREE.MeshBasicMaterial({
-            //  color: 0x9900FF,
-            //  transparent: true,
-            //  opacity: 0.3
-
-            //});
 
             mergedGeo.computeFaceNormals();
             barGroup	= new THREE.Mesh( mergedGeo, barMaterial );
@@ -329,14 +340,11 @@
             barGroup.matrixAutoUpdate = false;
             barGroup.updateMatrix();
             scene.add(barGroup);
-
-
+            firstFrame = true;
+            animate();
 
           });
         }
-
-
-
         function finish() {
           $http({
             method: 'POST',
@@ -347,19 +355,12 @@
             //alert(res.data);
           });
         }
-
-        function straightBuild() {
-
-        }
-
         // option #1 with ng-change="change()"
         $scope.change = function(str) {
           document.getElementById('json-datalist').innerHTML = '';
           getPost(str);
         }
-
       });
-
       </script>
 
 
