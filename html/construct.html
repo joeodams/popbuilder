@@ -7,8 +7,7 @@
       <button ng-click="test()">Submit
       </button>
       <div hidden>
-        This div is hidden
-            <canvas id="myCanvas" width="1280" height="768" crossOrigin="anonymous"></canvas>
+            <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
       </div>
 
       <script src="../tjs/build/three.js"></script>
@@ -46,29 +45,30 @@
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(response) {
             console.log(response);
-            for (var i = 0; i < 15; i++) {
+            for (var i = 0; i < 25; i++) {
               pngNames.push(response.data[i])
             }
-            lat = response.data[15];
-            long = response.data[16];
-            xoffset = response.data[17];
-            yoffset = response.data[18];
-            xspan = response.data[19];
-            yspan = response.data[20];
-            xtile = response.data[21];
-            ytile = response.data[22];
-            xraw = response.data[23];
-            yraw = response.data[24];
-            xorigin = response.data[25];
-            yorigin = response.data[26];
-            xtop = response.data[27];
-            ybottom = response.data[28];
-            xbottom = response.data[29];
-            ytop = response.data[30];
+            lat = response.data[25];
+            long = response.data[26];
+            xoffset = response.data[27];
+            yoffset = response.data[28];
+            xspan = response.data[29];
+            yspan = response.data[30];
+            xtile = response.data[31];
+            ytile = response.data[32];
+            xraw = response.data[33];
+            yraw = response.data[34];
+            xorigin = response.data[35];
+            yorigin = response.data[36];
+            xtop = response.data[37];
+            ybottom = response.data[38];
+            xbottom = response.data[39];
+            ytop = response.data[40];
             //alert("xtile number is: " + xtile + " , xraw number is: " + xraw + " ,ytile number is: " + ytile + " ,yraw number is: " + yraw);
             //alert("xorigin is: " + xorigin + " , long is: " + long + " , yorigin is: " + yorigin + " , lat is: " + lat);
             coords = [lat,long];
             var ctx=c.getContext("2d");
+            //NEEDS REFACTORING
             var imageObj1 = new Image();
             var imageObj2 = new Image();
             var imageObj3 = new Image();
@@ -84,6 +84,17 @@
             var imageObj13 = new Image();
             var imageObj14 = new Image();
             var imageObj15 = new Image();
+            var imageObj16 = new Image();
+            var imageObj17 = new Image();
+            var imageObj18 = new Image();
+            var imageObj19 = new Image();
+            var imageObj20 = new Image();
+            var imageObj21 = new Image();
+            var imageObj22 = new Image();
+            var imageObj23 = new Image();
+            var imageObj24 = new Image();
+            var imageObj25 = new Image();
+
             imageObj1.crossorigin = 'anonymous';
             imageObj2.crossorigin = 'anonymous';
             imageObj3.crossorigin = 'anonymous';
@@ -99,6 +110,17 @@
             imageObj13.crossorigin = 'anonymous';
             imageObj14.crossorigin = 'anonymous';
             imageObj15.crossorigin = 'anonymous';
+            imageObj16.crossorigin = 'anonymous';
+            imageObj17.crossorigin = 'anonymous';
+            imageObj18.crossorigin = 'anonymous';
+            imageObj19.crossorigin = 'anonymous';
+            imageObj20.crossorigin = 'anonymous';
+            imageObj21.crossorigin = 'anonymous';
+            imageObj22.crossorigin = 'anonymous';
+            imageObj23.crossorigin = 'anonymous';
+            imageObj24.crossorigin = 'anonymous';
+            imageObj25.crossorigin = 'anonymous';
+
             imageObj1.onload = function() {ctx.drawImage(imageObj1, 0, 0);}
             imageObj2.onload = function() {ctx.drawImage(imageObj2, 256, 0);}
             imageObj3.onload = function() {ctx.drawImage(imageObj3, 512, 0);}
@@ -113,8 +135,19 @@
             imageObj12.onload = function() {ctx.drawImage(imageObj12, 256, 512);}
             imageObj13.onload = function() {ctx.drawImage(imageObj13, 512, 512);}
             imageObj14.onload = function() {ctx.drawImage(imageObj14, 768, 512);}
-            imageObj15.onload = function() {
-              ctx.drawImage(imageObj15, 1024, 512);
+            imageObj15.onload = function() {ctx.drawImage(imageObj15, 1024, 512);}
+            imageObj16.onload = function() {ctx.drawImage(imageObj16, 0, 768);}
+            imageObj17.onload = function() {ctx.drawImage(imageObj17, 256, 768);}
+            imageObj18.onload = function() {ctx.drawImage(imageObj18, 512, 768);}
+            imageObj19.onload = function() {ctx.drawImage(imageObj19, 768, 768);}
+            imageObj20.onload = function() {ctx.drawImage(imageObj20, 1024, 768);}
+            imageObj21.onload = function() {ctx.drawImage(imageObj21, 0, 1024);}
+            imageObj22.onload = function() {ctx.drawImage(imageObj22, 256, 1024);}
+            imageObj23.onload = function() {ctx.drawImage(imageObj23, 512, 1024);}
+            imageObj24.onload = function() {ctx.drawImage(imageObj24, 768, 1024);}
+
+            imageObj25.onload = function() {
+              ctx.drawImage(imageObj25, 1024, 1024);
               init();
               //animate();
             }
@@ -133,6 +166,17 @@
             imageObj13.src = pngNames[12];
             imageObj14.src = pngNames[13];
             imageObj15.src = pngNames[14];
+            imageObj16.src = pngNames[15];
+            imageObj17.src = pngNames[16];
+            imageObj18.src = pngNames[17];
+            imageObj19.src = pngNames[18];
+            imageObj20.src = pngNames[19];
+            imageObj21.src = pngNames[20];
+            imageObj22.src = pngNames[21];
+            imageObj23.src = pngNames[22];
+            imageObj24.src = pngNames[23];
+            imageObj25.src = pngNames[24];
+
           })
         }
         function onMouseMove( event ) {
@@ -239,11 +283,13 @@
 
           if (scene.scale.y < 1) {
             scene.scale.y += 0.01;
+          }
+
+          if (scene.scale.y < 0.5) {
             camera.position.x += 10;
             camera.position.y += 10;
             camera.lookAt(mesh.position);
           }
-
 
           //alert(camera.position.x);
 
@@ -266,14 +312,14 @@
             mergedGeo	= new THREE.Geometry();
             var img = c.toDataURL("image/png");
             var texture = new THREE.TextureLoader().load( img );
-            var geometry = new THREE.BoxBufferGeometry( 1280, 20, 768 );
+            var geometry = new THREE.BoxBufferGeometry( 1280, 20, 1280 );
             var material = new THREE.MeshBasicMaterial( { map: texture } );
             group = new THREE.Object3D();
             mesh = new THREE.Mesh( geometry, material );
             scene.add( group );
             postcodeInfo = res.data;
             var longConst = Math.abs(1280 / xspan);
-            var latConst = Math.abs(768 / yspan);
+            var latConst = Math.abs(1280 / yspan);
             lat = lat - (yoffset);
             long = long - (xoffset);
             group.add(mesh);

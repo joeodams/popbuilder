@@ -21,7 +21,7 @@ if ($conn->connect_error) {
 $sql = "SELECT pcd.Postcode, Latitude, Longitude, Total
 FROM geodem.uk_postcodes AS pcd
 INNER JOIN geodem.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
-WHERE Latitude BETWEEN ($lat - 0.1) AND ($lat + 0.1) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
+WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
 
 
 if (!$result = $conn->query($sql)) {
