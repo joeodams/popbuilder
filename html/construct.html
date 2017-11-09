@@ -1,24 +1,113 @@
 <html lang="en" ng-app="test" >
+    <style>
+      body {background-color: black;}
+      input[type=text] {
+      width: 100%;
+      height: 100px;
+      padding: 12px 20px;
+      margin: 8px 0;
+      background-color:rgba(0, 0, 0, 0);
+      color:white;
+      border: none;
+      outline:none;
+      font-size:24px;
+      text-align: center;
+    }
+    .button {
+      background-color: #111111;
+      border: none;
+      width: 100%;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+    .center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      text-align: center;
+      width:546px;
+      height:265px;
+      margin-left: -273px; /*half width*/
+      margin-top: -132px; /*half height*/
+    }
+    .spinner {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      text-align: center;
+      width:265px;
+      height:265px;
+      margin-left: -132px; /*half width*/
+      margin-top: -132px; /*half height*/
+    }
+
+    .double-bounce1, .double-bounce2 {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: #333;
+      opacity: 0.6;
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+      animation: sk-bounce 2.0s infinite ease-in-out;
+    }
+
+    .double-bounce2 {
+      -webkit-animation-delay: -1.0s;
+      animation-delay: -1.0s;
+    }
+
+    @-webkit-keyframes sk-bounce {
+      0%, 100% { -webkit-transform: scale(0.0) }
+      50% { -webkit-transform: scale(1.0) }
+    }
+
+    @keyframes sk-bounce {
+      0%, 100% {
+        transform: scale(0.0);
+        -webkit-transform: scale(0.0);
+      } 50% {
+        transform: scale(1.0);
+        -webkit-transform: scale(1.0);
+      }
+    }
+    </style>
     <body ng-controller="PostCtrl">
 
+      <div id="cont" class="center" style="background-color:black;">
+        <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
 
-      <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
+
       <datalist id="json-datalist"></datalist>
-      <button ng-click="test()">Submit
+      <button ng-click="test()" class="button">Submit
       </button>
+      </div>
       <div hidden>
-        This div is hidden
-            <canvas id="myCanvas" width="1280" height="768" crossOrigin="anonymous"></canvas>
+            <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
+      </div>
+
+      <div id="spin" class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
       </div>
 
       <script src="../tjs/build/three.js"></script>
       <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 
+
       <!-- from here -->
       <script>
       var app = angular.module('test', []);
       var input = document.getElementById('inputajax');
+      var container = document.getElementById('cont');
       var dataList = document.getElementById('json-datalist');
       var camera, scene, renderer;
       var mesh;
@@ -34,11 +123,16 @@
       var meshes = [];
       var mergedGeo;
       var firstFrame;
+      var spi = document.getElementById('spin');
+      spi.style.display = "none";
+
       //var mergedGeo;
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
         $scope.test = function() {
           var val = document.getElementById('inputajax').value;
+          spi.style.display = "block";
+          container.style.display = "none";
           $http({
             method: 'POST',
             url: 'init.php',
@@ -46,93 +140,71 @@
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(response) {
             console.log(response);
-            for (var i = 0; i < 15; i++) {
+
+            for (var i = 0; i < 25; i++) {
               pngNames.push(response.data[i])
             }
-            lat = response.data[15];
-            long = response.data[16];
-            xoffset = response.data[17];
-            yoffset = response.data[18];
-            xspan = response.data[19];
-            yspan = response.data[20];
-            xtile = response.data[21];
-            ytile = response.data[22];
-            xraw = response.data[23];
-            yraw = response.data[24];
-            xorigin = response.data[25];
-            yorigin = response.data[26];
-            xtop = response.data[27];
-            ybottom = response.data[28];
-            xbottom = response.data[29];
-            ytop = response.data[30];
-            //alert("xtile number is: " + xtile + " , xraw number is: " + xraw + " ,ytile number is: " + ytile + " ,yraw number is: " + yraw);
-            //alert("xorigin is: " + xorigin + " , long is: " + long + " , yorigin is: " + yorigin + " , lat is: " + lat);
+            lat = response.data[25];
+            long = response.data[26];
+            xoffset = response.data[27];
+            yoffset = response.data[28];
+            xspan = response.data[29];
+            yspan = response.data[30];
+            xtile = response.data[31];
+            ytile = response.data[32];
+            xraw = response.data[33];
+            yraw = response.data[34];
+            xorigin = response.data[35];
+            yorigin = response.data[36];
+            xtop = response.data[37];
+            ybottom = response.data[38];
+            xbottom = response.data[39];
+            ytop = response.data[40];
+
             coords = [lat,long];
             var ctx=c.getContext("2d");
-            var imageObj1 = new Image();
-            var imageObj2 = new Image();
-            var imageObj3 = new Image();
-            var imageObj4 = new Image();
-            var imageObj5 = new Image();
-            var imageObj6 = new Image();
-            var imageObj7 = new Image();
-            var imageObj8 = new Image();
-            var imageObj9 = new Image();
-            var imageObj10 = new Image();
-            var imageObj11 = new Image();
-            var imageObj12 = new Image();
-            var imageObj13 = new Image();
-            var imageObj14 = new Image();
-            var imageObj15 = new Image();
-            imageObj1.crossorigin = 'anonymous';
-            imageObj2.crossorigin = 'anonymous';
-            imageObj3.crossorigin = 'anonymous';
-            imageObj4.crossorigin = 'anonymous';
-            imageObj5.crossorigin = 'anonymous';
-            imageObj6.crossorigin = 'anonymous';
-            imageObj7.crossorigin = 'anonymous';
-            imageObj8.crossorigin = 'anonymous';
-            imageObj9.crossorigin = 'anonymous';
-            imageObj10.crossorigin = 'anonymous';
-            imageObj11.crossorigin = 'anonymous';
-            imageObj12.crossorigin = 'anonymous';
-            imageObj13.crossorigin = 'anonymous';
-            imageObj14.crossorigin = 'anonymous';
-            imageObj15.crossorigin = 'anonymous';
-            imageObj1.onload = function() {ctx.drawImage(imageObj1, 0, 0);}
-            imageObj2.onload = function() {ctx.drawImage(imageObj2, 256, 0);}
-            imageObj3.onload = function() {ctx.drawImage(imageObj3, 512, 0);}
-            imageObj4.onload = function() {ctx.drawImage(imageObj4, 768, 0);}
-            imageObj5.onload = function() {ctx.drawImage(imageObj5, 1024, 0);}
-            imageObj6.onload = function() {ctx.drawImage(imageObj6, 0, 256);}
-            imageObj7.onload = function() {ctx.drawImage(imageObj7, 256, 256);}
-            imageObj8.onload = function() {ctx.drawImage(imageObj8, 512, 256);}
-            imageObj9.onload = function() {ctx.drawImage(imageObj9, 768, 256);}
-            imageObj10.onload = function() {ctx.drawImage(imageObj10, 1024, 256);}
-            imageObj11.onload = function() {ctx.drawImage(imageObj11, 0, 512);}
-            imageObj12.onload = function() {ctx.drawImage(imageObj12, 256, 512);}
-            imageObj13.onload = function() {ctx.drawImage(imageObj13, 512, 512);}
-            imageObj14.onload = function() {ctx.drawImage(imageObj14, 768, 512);}
-            imageObj15.onload = function() {
-              ctx.drawImage(imageObj15, 1024, 512);
-              init();
-              //animate();
+            //NEEDS REFACTORING
+            var imageObjs = [];
+
+            var yt = 0;
+            var xt = 0;
+            var imgPos = [];
+
+            for (var i = 0; i < 25; i++) {
+              imgPos.push([xt,yt]);
+
+              xt = xt + 256;
+              if (xt == 1280) {
+                xt = 0;
+                yt = yt + 256;
+              }
             }
-            imageObj1.src = pngNames[0];
-            imageObj2.src = pngNames[1];
-            imageObj3.src = pngNames[2];
-            imageObj4.src = pngNames[3];
-            imageObj5.src = pngNames[4];
-            imageObj6.src = pngNames[5];
-            imageObj7.src = pngNames[6];
-            imageObj8.src = pngNames[7];
-            imageObj9.src = pngNames[8];
-            imageObj10.src = pngNames[9];
-            imageObj11.src = pngNames[10];
-            imageObj12.src = pngNames[11];
-            imageObj13.src = pngNames[12];
-            imageObj14.src = pngNames[13];
-            imageObj15.src = pngNames[14];
+
+
+            for (var i = 0; i < 25; i++) {
+              displayTile(i);
+            }
+
+            function displayTile(tileNumber) {
+              var img = new Image();
+
+              //imageObjs.push(img);
+              if (i == 24) {
+                img.crossorigin = 'anonymous';
+                img.onload = function() {
+                  ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]);
+                  init();
+                }
+                img.src = pngNames[tileNumber];
+              }
+              else {
+                //alert(xt + " " + yt);
+                img.crossorigin = 'anonymous';
+                img.onload = function() { ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]); }
+                img.src = pngNames[tileNumber];
+              }
+            }
+
           })
         }
         function onMouseMove( event ) {
@@ -171,7 +243,7 @@
             }
             intersects[0].object.geometry.elementsNeedUpdate = true;
             intersects[0].object.geometry.colorsNeedUpdate = true;
-            alert(intersects[0].object.geometry.faces[0].color.getHexString());
+            //alert(intersects[0].object.geometry.faces[0].color.getHexString());
             //intersects[ 0 ].object.material.color.set( 0xff0000 );
             //alert(intersects[0].object.material.color.getHexString());
             //intersects[0].
@@ -239,11 +311,13 @@
 
           if (scene.scale.y < 1) {
             scene.scale.y += 0.01;
+          }
+
+          if (scene.scale.y < 0.5) {
             camera.position.x += 10;
             camera.position.y += 10;
             camera.lookAt(mesh.position);
           }
-
 
           //alert(camera.position.x);
 
@@ -251,6 +325,7 @@
           mesh.scale.y = 1;
 
           //position.needsUpdate = true;
+          spi.style.display = "none";
           renderer.render( scene, camera );
           camera.aspect = window.innerWidth / window.innerHeight;
           camera.updateProjectionMatrix();
@@ -266,19 +341,19 @@
             mergedGeo	= new THREE.Geometry();
             var img = c.toDataURL("image/png");
             var texture = new THREE.TextureLoader().load( img );
-            var geometry = new THREE.BoxBufferGeometry( 1280, 20, 768 );
+            var geometry = new THREE.BoxBufferGeometry( 1280, 20, 1280 );
             var material = new THREE.MeshBasicMaterial( { map: texture } );
             group = new THREE.Object3D();
             mesh = new THREE.Mesh( geometry, material );
             scene.add( group );
             postcodeInfo = res.data;
             var longConst = Math.abs(1280 / xspan);
-            var latConst = Math.abs(768 / yspan);
+            var latConst = Math.abs(1280 / yspan);
             lat = lat - (yoffset);
             long = long - (xoffset);
             group.add(mesh);
 
-            alert(postcodeInfo.length);
+            //alert(postcodeInfo.length);
             //alert(mergedGeo);
             for (var i = 0; i < postcodeInfo.length; i++) {
             //for (var i = 0; i < 10; i++) {

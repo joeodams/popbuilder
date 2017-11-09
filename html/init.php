@@ -28,6 +28,7 @@ $ytile = round($yraw);
 //$yoffset = ($yraw - $ytile) * 0.027;
 //DEGREES VS RADIANS
 
+/*
 $xbottom = ((($xtile - 3) / $n ) * 360) - 180;
 $ybottom =  atan( sinh( pi() - ((($ytile - 2) / $n) * 2 * pi()) ) ) * (180 / pi());
 
@@ -47,6 +48,28 @@ $yoffset = $lat - $yorigin;
 $xlocs = array($xtile - 3, $xtile - 2, $xtile - 1, $xtile, $xtile + 1);
 //$ylocs = array($ytile - 1, $ytile, $ytile + 1);
 $ylocs = array($ytile - 2, $ytile - 1, $ytile);
+
+*/
+
+$xbottom = ((($xtile - 3) / $n ) * 360) - 180;
+$ybottom =  atan( sinh( pi() - ((($ytile - 3) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xtop = ((($xtile + 2) / $n ) * 360) - 180;
+$ytop =  atan( sinh( pi() - ((($ytile + 2) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xorigin = ((($xtile - 0.5) / $n ) * 360) - 180;
+$yorigin =  atan( sinh( pi() - ((($ytile - 0.5) / $n) * 2 * pi()) ) ) * (180 / pi());
+
+$xspan = $xtop - $xbottom;
+$yspan = $ytop - $ybottom;
+
+$xoffset = $long - $xorigin;
+$yoffset = $lat - $yorigin;
+
+//$xlocs = array($xtile - 2, $xtile - 1, $xtile, $xtile + 1, $xtile + 2);
+$xlocs = array($xtile - 3, $xtile - 2, $xtile - 1, $xtile, $xtile + 1);
+//$ylocs = array($ytile - 1, $ytile, $ytile + 1);
+$ylocs = array($ytile - 3, $ytile - 2, $ytile - 1,  $ytile, $ytile + 1);
 
 $time = time();
 
@@ -68,6 +91,18 @@ foreach ($xlocs as $xvalue) {
   $url = "http://tile.openstreetmap.org/13/" . $xvalue . "/" . $ylocs[2] . ".png";
   copy($url, $time.$xvalue.$ylocs[2].".png");
   array_push($pngnames,$time.$xvalue.$ylocs[2].".png");
+}
+
+foreach ($xlocs as $xvalue) {
+  $url = "http://tile.openstreetmap.org/13/" . $xvalue . "/" . $ylocs[3] . ".png";
+  copy($url, $time.$xvalue.$ylocs[3].".png");
+  array_push($pngnames,$time.$xvalue.$ylocs[3].".png");
+}
+
+foreach ($xlocs as $xvalue) {
+  $url = "http://tile.openstreetmap.org/13/" . $xvalue . "/" . $ylocs[4] . ".png";
+  copy($url, $time.$xvalue.$ylocs[4].".png");
+  array_push($pngnames,$time.$xvalue.$ylocs[4].".png");
 }
 
 array_push($pngnames,$lat);
