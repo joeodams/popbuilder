@@ -34,6 +34,7 @@
       margin-left: -273px; /*half width*/
       margin-top: -132px; /*half height*/
     }
+
     .spinner {
       position: absolute;
       left: 50%;
@@ -78,16 +79,41 @@
         -webkit-transform: scale(1.0);
       }
     }
+    label
+    {
+      background-color:#ffffff;
+      padding: 5px 12px;
+    }
+
+    input[type=radio]
+    {
+      display:none;
+    }
+    input[type=radio]:checked + label
+    {
+      background-color:#8e8e8e;
+    }
+
     </style>
     <body ng-controller="PostCtrl">
 
       <div id="cont" class="center" style="background-color:black;">
+
         <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
 
+        <form>
+          <input type="radio" id="1" class="rad" name="name" value="popden" />
+          <label for="1">Population density</label>
+          <input type="radio" id="2" class="rad" name="name" value="houpi" />
+          <label for="2">House prices</label>
+          <input type="radio" id="3" class="rad" name="name" value="cri"/>
+          <label for="3">Crime</label>
+        </form>
 
-      <datalist id="json-datalist"></datalist>
-      <button ng-click="test()" class="button">Submit
-      </button>
+        <datalist id="json-datalist"></datalist>
+
+        <button ng-click="test()" class="button">Submit</button>
+
       </div>
       <div hidden>
             <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
@@ -97,7 +123,10 @@
         <div class="double-bounce1"></div>
         <div class="double-bounce2"></div>
       </div>
-
+      <script>
+      var spi = document.getElementById('spin');
+      spi.style.display = "none";
+      </script>
       <script src="../tjs/build/three.js"></script>
       <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
@@ -124,7 +153,10 @@
       var mergedGeo;
       var firstFrame;
       var spi = document.getElementById('spin');
-      spi.style.display = "none";
+
+      var statType;
+
+
 
       //var mergedGeo;
       app.controller('PostCtrl', function($scope, $http) {
@@ -133,6 +165,17 @@
           var val = document.getElementById('inputajax').value;
           spi.style.display = "block";
           container.style.display = "none";
+
+          var selection = document.forms[0];
+
+          for (var i = 0; i < selection.length; i++) {
+            //alert(selection[i].value);
+            if (selection[i].checked) {
+              statType = selection[i].value;
+            }
+          }
+          alert(statType);
+
           $http({
             method: 'POST',
             url: 'init.php',
@@ -252,6 +295,7 @@
         	renderer.render( scene, camera );
 
         }
+        
         function getPost(str) {
           var postJSON = 'https://api.postcodes.io/postcodes/' + str + '/autocomplete'
           $http.get(postJSON)
