@@ -1,10 +1,12 @@
 <?php
 $postdata = file_get_contents("php://input");
 
-$coord = json_decode($postdata);
+$coord = json_decode($postdata,true);
 
-$lat = $coord[0];
-$long = $coord[1];
+$type = $coord["type"];
+
+$lat = $coord["loc"][0];
+$long = $coord["loc"][1];
 
 $servername = "localhost";
 $username = "root";
@@ -18,10 +20,23 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT pcd.Postcode, Latitude, Longitude, Total
-FROM geodem.uk_postcodes AS pcd
-INNER JOIN geodem.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
-WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
+switch ($type) {
+  case 0:
+    $sql = "SELECT pcd.Postcode, Latitude, Longitude, Total
+    FROM geodem.uk_postcodes AS pcd
+    INNER JOIN geodem.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
+    WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
+    break;
+
+  case 1:
+    $sql = "SELECT pcd.Postcode, Latitude, Longitude, (Total / 5000) AS Total
+    FROM geodem.uk_postcodes AS pcd
+    INNER JOIN geodem.house_prices AS ppd ON ppd.pcd_fix = pcd.pcd_fix
+    WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2)";
+    break;
+}
+
+
 
 
 if (!$result = $conn->query($sql)) {
@@ -48,7 +63,10 @@ while($r = mysqli_fetch_assoc($result)) {
 //echo $conn->affected_rows . "\n";
 
 
+//echo $type;
+//echo $long;
 echo json_encode($rows);
+
 
 
 //

@@ -1,3 +1,4 @@
+<meta charset="UTF-8"> 
 <html lang="en" ng-app="test" >
     <style>
       body {background-color: black;}
@@ -102,11 +103,11 @@
         <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
 
         <form>
-          <input type="radio" id="1" class="rad" name="name" value="popden" />
+          <input type="radio" id="1" class="rad" name="name" value=0 />
           <label for="1">Population density</label>
-          <input type="radio" id="2" class="rad" name="name" value="houpi" />
+          <input type="radio" id="2" class="rad" name="name" value=1 />
           <label for="2">House prices</label>
-          <input type="radio" id="3" class="rad" name="name" value="cri"/>
+          <input type="radio" id="3" class="rad" name="name" value=2/>
           <label for="3">Crime</label>
         </form>
 
@@ -174,7 +175,7 @@
               statType = selection[i].value;
             }
           }
-          alert(statType);
+          //alert(statType);
 
           $http({
             method: 'POST',
@@ -295,7 +296,7 @@
         	renderer.render( scene, camera );
 
         }
-        
+
         function getPost(str) {
           var postJSON = 'https://api.postcodes.io/postcodes/' + str + '/autocomplete'
           $http.get(postJSON)
@@ -309,7 +310,7 @@
             });
         }
         function init() {
-          buildModel();
+          buildModel(statType);
           camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
           camera.position.z = 800;
           scene = new THREE.Scene();
@@ -375,11 +376,11 @@
           camera.updateProjectionMatrix();
           renderer.setSize( window.innerWidth, window.innerHeight );
         }
-        function buildModel() {
+        function buildModel(modelType) {
           $http({
             method: 'POST',
             url: 'query.php',
-            data: coords,
+            data: { "loc": coords, "type": modelType },
             headers: {'Content-Type': 'application/x-www-form-urlencoded'}
           }).then(function(res) {
             mergedGeo	= new THREE.Geometry();
@@ -401,6 +402,8 @@
             //alert(mergedGeo);
             for (var i = 0; i < postcodeInfo.length; i++) {
             //for (var i = 0; i < 10; i++) {
+
+            //TODO: These checks shouldn't be necessary as query.php should know exactly what data to spit out
               if (postcodeInfo[i]["Latitude"] < (lat + (yspan / 2)) ) {
                 continue;
               }
@@ -435,8 +438,27 @@
 
               barMaterial.transparent = true;
               barMaterial.opacity = 0.6;
-              barMaterial.color.set(barColour);
-              barMaterial.color.setRGB(1, gColor, 0);
+
+              //from here
+              switch (modelType) {
+               case "0":
+                 barMaterial.color.setRGB(1, gColor, 0);
+                 break;
+               case "1":
+                 barMaterial.color.setRGB(1, 0 , gColor);
+                 break;
+              }
+              //to here
+
+              //barMaterial.color.setRGB(1, gColor, 0);
+
+              // if (modelType == 1) {
+              //   barMaterial.color.setRGB(1, 0 ,gColor);
+              // }
+              // if (modelType == 0) {
+              //   barMaterial.color.setRGB(1, gColor, 0);
+              // }
+
 
               for ( var z = 0; z < barGeometry.faces.length; z ++ ) {
                   barGeometry.faces[ z ].color = barMaterial.color;
