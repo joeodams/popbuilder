@@ -1,4 +1,4 @@
-<meta charset="UTF-8"> 
+<meta charset="UTF-8">
 <html lang="en" ng-app="test" >
     <style>
       body {background-color: black;}
@@ -66,6 +66,12 @@
       animation-delay: -1.0s;
     }
 
+    .test {
+      color: white;
+      text-align: right;
+
+    }
+
     @-webkit-keyframes sk-bounce {
       0%, 100% { -webkit-transform: scale(0.0) }
       50% { -webkit-transform: scale(1.0) }
@@ -94,6 +100,17 @@
     {
       background-color:#8e8e8e;
     }
+    #hud {
+      position: absolute;
+      padding: 10px 10px;
+      width: 100%;
+      text-align: right;
+      color: black;
+      top : 1;
+    }
+    .radiotext {
+      margin: 50px 50px 0px 0px;
+    }
 
     </style>
     <body ng-controller="PostCtrl">
@@ -103,11 +120,11 @@
         <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
 
         <form>
-          <input type="radio" id="1" class="rad" name="name" value=0 />
+          <input type="radio" id="1" class="rad" name="name" value="0"/>
           <label for="1">Population density</label>
-          <input type="radio" id="2" class="rad" name="name" value=1 />
+          <input type="radio" id="2" class="rad" name="name" value="1"/>
           <label for="2">House prices</label>
-          <input type="radio" id="3" class="rad" name="name" value=2/>
+          <input type="radio" id="3" class="rad" name="name" value="2"/>
           <label for="3">Crime</label>
         </form>
 
@@ -120,6 +137,35 @@
             <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
       </div>
 
+      <div id="hud" >
+        <form>
+          <tr>
+            <td>
+              <div class = "radiotext">
+                <input type="radio" id="4" name="name1" value="3" ng-click="tFunction()"/>
+                <label for="4">Population density</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class = "radiotext">
+                <input type="radio" id="5" name="name1" value="4" ng-click="tFunction()"/>
+                <label for="5">House prices</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class = "radiotext">
+                <input type="radio" id="6" name="name1" value="5" ng-click="tFunction()"/>
+                <label for="6">Crime</label>
+              </div>
+            </td>
+          </tr>
+        </form>
+      </div>
+
       <div id="spin" class="spinner">
         <div class="double-bounce1"></div>
         <div class="double-bounce2"></div>
@@ -127,6 +173,9 @@
       <script>
       var spi = document.getElementById('spin');
       spi.style.display = "none";
+
+      var hud = document.getElementById('hud');
+      hud.style.display = "none";
       </script>
       <script src="../tjs/build/three.js"></script>
       <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
@@ -154,20 +203,26 @@
       var mergedGeo;
       var firstFrame;
       var spi = document.getElementById('spin');
+      var hud = document.getElementById('hud');
 
       var statType;
-
-
 
       //var mergedGeo;
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
+
+        $scope.tFunction = function() {
+          test();
+        }
+
         $scope.test = function() {
           var val = document.getElementById('inputajax').value;
           spi.style.display = "block";
           container.style.display = "none";
 
+
           var selection = document.forms[0];
+          var hudRad = document.forms[1];
 
           for (var i = 0; i < selection.length; i++) {
             //alert(selection[i].value);
@@ -175,7 +230,9 @@
               statType = selection[i].value;
             }
           }
-          //alert(statType);
+
+          hudRad[statType].checked = true;
+
 
           $http({
             method: 'POST',
@@ -188,6 +245,12 @@
             for (var i = 0; i < 25; i++) {
               pngNames.push(response.data[i])
             }
+
+            function tFunction()
+            {
+              alert('test');
+            }
+
             lat = response.data[25];
             long = response.data[26];
             xoffset = response.data[27];
@@ -294,7 +357,7 @@
           }
 
         	renderer.render( scene, camera );
-
+          hud.style.display = "block";
         }
 
         function getPost(str) {
@@ -398,41 +461,71 @@
             long = long - (xoffset);
             group.add(mesh);
 
+            var avg = postcodeInfo[0][0]["Average"];
+            var stddev = postcodeInfo[0][0]["Stddev"];
+            var max = postcodeInfo[0][0]["Maximum"];
+
+            avg = parseFloat(avg);
+            stddev = parseFloat(stddev);
+            max = parseFloat(max);
+
+            var upperBound = avg + (stddev * 2);
+            upperBound = parseFloat(upperBound);
+
+            //upperBound = upperBound * 3;
+            //alert(avg + " " + stddev + " " +  upperBound + " " + max);
+
+            //alert(postcodeInfo[1][0]["Latitude"]);
+
+            //alert(postcodeInfo[1].length);
+
+            //var maxValue = Math.max.apply(Math, nums);
+
+            //alert(maxValue);
+
             //alert(postcodeInfo.length);
             //alert(mergedGeo);
-            for (var i = 0; i < postcodeInfo.length; i++) {
+            for (var i = 1; i < postcodeInfo[1].length; i++) {
             //for (var i = 0; i < 10; i++) {
 
             //TODO: These checks shouldn't be necessary as query.php should know exactly what data to spit out
-              if (postcodeInfo[i]["Latitude"] < (lat + (yspan / 2)) ) {
+              if (postcodeInfo[1][i]["Latitude"] < (lat + (yspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[i]["Longitude"] > (long + (xspan / 2)) ) {
+              if (postcodeInfo[1][i]["Longitude"] > (long + (xspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[i]["Latitude"] > (lat - (yspan / 2)) ) {
+              if (postcodeInfo[1][i]["Latitude"] > (lat - (yspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[i]["Longitude"] < (long - (xspan / 2)) ) {
+              if (postcodeInfo[1][i]["Longitude"] < (long - (xspan / 2)) ) {
                 continue;
               }
-              var barGeometry = new THREE.BoxGeometry( 2, postcodeInfo[i]["Total"], 2 );
+
+              //alert((postcodeInfo[1][i]["Total"] / max) * 200);
+              var barGeometry = new THREE.BoxGeometry( 2, (postcodeInfo[1][i]["Total"] / upperBound) * 150, 2 );
+              //var barGeometry = new THREE.BoxGeometry( 2, postcodeInfo[1][i]["Total"], 2 );
               var barMaterial 	= new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
               //var barMaterial 	= new THREE.MeshBasicMaterial();
       				var barMesh	= new THREE.Mesh( barGeometry );
               var rColor, gColor;
-              if (postcodeInfo[i]["Total"] < 150) {
-                rColor = postcodeInfo[i]["Total"] / 150;
+
+
+
+              if (postcodeInfo[1][i]["Total"] < upperBound) {
+                rColor = postcodeInfo[1][i]["Total"] / upperBound;
               }
               else {
                 rColor = 1.0;
               }
-              if (postcodeInfo[i]["Total"] < 150) {
-                gColor = 1 - (postcodeInfo[i]["Total"] / 150);
+              if (postcodeInfo[1][i]["Total"] < upperBound) {
+                gColor = 1 - (postcodeInfo[1][i]["Total"] / upperBound);
               }
               else {
                 gColor = 0.0;
               }
+
+              //alert(upperBound + " " + postcodeInfo[1][i]["Total"] + " " +  rColor + " " + gColor);
 
               var barColour = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
 
@@ -448,6 +541,8 @@
                  barMaterial.color.setRGB(1, 0 , gColor);
                  break;
               }
+
+              //alert(barMaterial.color.getHexString());
               //to here
 
               //barMaterial.color.setRGB(1, gColor, 0);
@@ -464,9 +559,9 @@
                   barGeometry.faces[ z ].color = barMaterial.color;
               }
 
-              var xpos = ((((postcodeInfo[i]["Longitude"] - long ) ) * longConst));
-              var ypos = (postcodeInfo[i]["Total"] / 2);
-              var zpos = -((((postcodeInfo[i]["Latitude"] - lat ) ) * latConst));
+              var xpos = ((((postcodeInfo[1][i]["Longitude"] - long ) ) * longConst));
+              var ypos = (((postcodeInfo[1][i]["Total"] / upperBound) * 150) / 2);
+              var zpos = -((((postcodeInfo[1][i]["Latitude"] - lat ) ) * latConst));
               barGeometry.translate(xpos,ypos,zpos);
 
               meshes.push(barMesh);
