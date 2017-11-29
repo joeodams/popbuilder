@@ -26,10 +26,9 @@ $conn->query($db);
 
 switch ($type) {
   case 0:
-    $init = "CREATE TABLE temptable AS (SELECT pcd.Postcode, Latitude, Longitude, Total
-    FROM geodem.uk_postcodes AS pcd
-    INNER JOIN geodem.populations AS pop ON pop.pcd_fix = pcd.pcd_fix
-    WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    $init = "CREATE TABLE temptable AS (SELECT Postcode, latitude, longitude, Total
+    FROM geodem.populations
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -38,16 +37,38 @@ switch ($type) {
     break;
 
   case 1:
-    $init = "CREATE TABLE temptable AS (SELECT pcd.Postcode, Latitude, Longitude, (Total / 5000) AS Total
-    FROM geodem.uk_postcodes AS pcd
-    INNER JOIN geodem.house_prices AS ppd ON ppd.pcd_fix = pcd.pcd_fix
-    WHERE Latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND Longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    $init = "CREATE TABLE temptable AS (SELECT pcd_fix, latitude, longitude, Total
+    FROM geodem.house_prices
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
 
     $sql = "SELECT * FROM temptable";
 
     $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
     FROM temptable";
     break;
+
+  case 2:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, Total
+    FROM geodem.crimes
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 3:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, unemployed_adults AS Total
+    FROM geodem.unemployment
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
 }
 
 $drop = "DROP TABLE temptable";

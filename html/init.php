@@ -105,27 +105,7 @@ foreach ($xlocs as $xvalue) {
   array_push($pngnames,$time.$xvalue.$ylocs[4].".png");
 }
 
-array_push($pngnames,$lat);
-array_push($pngnames,$long);
-
-array_push($pngnames,$xoffset);
-array_push($pngnames,$yoffset);
-
-array_push($pngnames,$xspan);
-array_push($pngnames,$yspan);
-
-array_push($pngnames,$xtile);
-array_push($pngnames,$ytile);
-array_push($pngnames,$xraw);
-array_push($pngnames,$yraw);
-array_push($pngnames,$xorigin);
-array_push($pngnames,$yorigin);
-
-array_push($pngnames,$xtop);
-array_push($pngnames,$ytop);
-array_push($pngnames,$xbottom);
-array_push($pngnames,$ybottom);
-
+array_push($pngnames,$lat,$long,$xoffset,$yoffset,$xspan,$yspan,$xtile,$ytile,$xraw,$yraw,$xorigin,$yorigin,$xtop,$ytop,$xbottom,$ybottom);
 
 echo json_encode(array_values($pngnames));
 

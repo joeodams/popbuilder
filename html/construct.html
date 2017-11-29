@@ -126,6 +126,8 @@
           <label for="2">House prices</label>
           <input type="radio" id="3" class="rad" name="name" value="2"/>
           <label for="3">Crime</label>
+          <input type="radio" id="4" class="rad" name="name" value="3"/>
+          <label for="4">Unemployment</label>
         </form>
 
         <datalist id="json-datalist"></datalist>
@@ -142,24 +144,32 @@
           <tr>
             <td>
               <div class = "radiotext">
-                <input type="radio" id="4" name="name1" value="3" ng-click="tFunction()"/>
-                <label for="4">Population density</label>
+                <input type="radio" id="5" name="name1" value="3" ng-click="tFunction(0)"/>
+                <label for="5">Population density</label>
               </div>
             </td>
           </tr>
           <tr>
             <td>
               <div class = "radiotext">
-                <input type="radio" id="5" name="name1" value="4" ng-click="tFunction()"/>
-                <label for="5">House prices</label>
+                <input type="radio" id="6" name="name1" value="4" ng-click="tFunction(1)"/>
+                <label for="6">House prices</label>
               </div>
             </td>
           </tr>
           <tr>
             <td>
               <div class = "radiotext">
-                <input type="radio" id="6" name="name1" value="5" ng-click="tFunction()"/>
-                <label for="6">Crime</label>
+                <input type="radio" id="7" name="name1" value="5" ng-click="tFunction(2)"/>
+                <label for="7">Crime</label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class = "radiotext">
+                <input type="radio" id="8" name="name1" value="6" ng-click="tFunction(3)"/>
+                <label for="8">Unemployment</label>
               </div>
             </td>
           </tr>
@@ -204,15 +214,17 @@
       var firstFrame;
       var spi = document.getElementById('spin');
       var hud = document.getElementById('hud');
-
+      var rebuild;
       var statType;
 
       //var mergedGeo;
       app.controller('PostCtrl', function($scope, $http) {
         $scope.select = "";
 
-        $scope.tFunction = function() {
-          test();
+        $scope.tFunction = function(s) {
+          alert(s);
+          statType = s;
+          $scope.test();
         }
 
         $scope.test = function() {
@@ -221,98 +233,113 @@
           container.style.display = "none";
 
 
+          rebuild = false;
+
+          if (typeof scene != 'undefined') {
+            rebuild = true;
+            while (scene.children.length > 0) {
+              scene.remove(scene.children[0]);
+            }
+          }
+          //alert(rebuild);
+
+
           var selection = document.forms[0];
           var hudRad = document.forms[1];
 
-          for (var i = 0; i < selection.length; i++) {
-            //alert(selection[i].value);
-            if (selection[i].checked) {
-              statType = selection[i].value;
+          if (!rebuild) {
+            for (var i = 0; i < selection.length; i++) {
+              //alert(selection[i].value);
+              if (selection[i].checked) {
+                statType = selection[i].value;
+              }
             }
           }
 
+
           hudRad[statType].checked = true;
 
+          if (rebuild) {
+            meshes = [];
+            init();
+          }
+          else {
+            $http({
+              method: 'POST',
+              url: 'init.php',
+              data: val,
+              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).then(function(response) {
+              console.log(response);
 
-          $http({
-            method: 'POST',
-            url: 'init.php',
-            data: val,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-          }).then(function(response) {
-            console.log(response);
-
-            for (var i = 0; i < 25; i++) {
-              pngNames.push(response.data[i])
-            }
-
-            function tFunction()
-            {
-              alert('test');
-            }
-
-            lat = response.data[25];
-            long = response.data[26];
-            xoffset = response.data[27];
-            yoffset = response.data[28];
-            xspan = response.data[29];
-            yspan = response.data[30];
-            xtile = response.data[31];
-            ytile = response.data[32];
-            xraw = response.data[33];
-            yraw = response.data[34];
-            xorigin = response.data[35];
-            yorigin = response.data[36];
-            xtop = response.data[37];
-            ybottom = response.data[38];
-            xbottom = response.data[39];
-            ytop = response.data[40];
-
-            coords = [lat,long];
-            var ctx=c.getContext("2d");
-            //NEEDS REFACTORING
-            var imageObjs = [];
-
-            var yt = 0;
-            var xt = 0;
-            var imgPos = [];
-
-            for (var i = 0; i < 25; i++) {
-              imgPos.push([xt,yt]);
-
-              xt = xt + 256;
-              if (xt == 1280) {
-                xt = 0;
-                yt = yt + 256;
+              for (var i = 0; i < 25; i++) {
+                pngNames.push(response.data[i])
               }
-            }
 
+              lat = response.data[25];
+              long = response.data[26];
+              xoffset = response.data[27];
+              yoffset = response.data[28];
+              xspan = response.data[29];
+              yspan = response.data[30];
+              xtile = response.data[31];
+              ytile = response.data[32];
+              xraw = response.data[33];
+              yraw = response.data[34];
+              xorigin = response.data[35];
+              yorigin = response.data[36];
+              xtop = response.data[37];
+              ybottom = response.data[38];
+              xbottom = response.data[39];
+              ytop = response.data[40];
 
-            for (var i = 0; i < 25; i++) {
-              displayTile(i);
-            }
+              coords = [lat,long];
+              var ctx=c.getContext("2d");
+              //NEEDS REFACTORING
+              var imageObjs = [];
 
-            function displayTile(tileNumber) {
-              var img = new Image();
+              var yt = 0;
+              var xt = 0;
+              var imgPos = [];
 
-              //imageObjs.push(img);
-              if (i == 24) {
-                img.crossorigin = 'anonymous';
-                img.onload = function() {
-                  ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]);
-                  init();
+              for (var i = 0; i < 25; i++) {
+                imgPos.push([xt,yt]);
+
+                xt = xt + 256;
+                if (xt == 1280) {
+                  xt = 0;
+                  yt = yt + 256;
                 }
-                img.src = pngNames[tileNumber];
               }
-              else {
-                //alert(xt + " " + yt);
-                img.crossorigin = 'anonymous';
-                img.onload = function() { ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]); }
-                img.src = pngNames[tileNumber];
-              }
-            }
 
-          })
+
+              for (var i = 0; i < 25; i++) {
+                displayTile(i);
+              }
+
+              function displayTile(tileNumber) {
+                var img = new Image();
+
+                //imageObjs.push(img);
+                if (i == 24) {
+                  img.crossorigin = 'anonymous';
+                  img.onload = function() {
+                    ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]);
+                    init();
+                  }
+                  img.src = pngNames[tileNumber];
+                }
+                else {
+                  //alert(xt + " " + yt);
+                  img.crossorigin = 'anonymous';
+                  img.onload = function() { ctx.drawImage(img, imgPos[tileNumber][0], imgPos[tileNumber][1]); }
+                  img.src = pngNames[tileNumber];
+                }
+              }
+
+            })
+          }
+
         }
         function onMouseMove( event ) {
 
@@ -373,23 +400,29 @@
             });
         }
         function init() {
-          buildModel(statType);
-          camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
-          camera.position.z = 800;
-          scene = new THREE.Scene();
-          renderer = new THREE.WebGLRenderer({ alpha: true });
-          renderer.setPixelRatio( window.devicePixelRatio );
-          renderer.setSize( window.innerWidth, window.innerHeight );
-          document.body.appendChild( renderer.domElement );
-          window.addEventListener( 'resize', onWindowResize, false );
-          var orbit = new THREE.OrbitControls( camera );
-          //console.log(mesh.matrix);
-          scene.background = new THREE.Color( 0x000000 );
+          if (rebuild) {
+            buildModel(statType);
+          }
+          else {
+            buildModel(statType);
+            camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
+            camera.position.z = 800;
+            scene = new THREE.Scene();
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild( renderer.domElement );
+            window.addEventListener( 'resize', onWindowResize, false );
+            var orbit = new THREE.OrbitControls( camera );
+            //console.log(mesh.matrix);
+            scene.background = new THREE.Color( 0x000000 );
 
-          window.addEventListener( 'mousemove', onMouseMove, false );
+            window.addEventListener( 'mousemove', onMouseMove, false );
 
-          window.requestAnimationFrame(render);
-          finish();
+            window.requestAnimationFrame(render);
+            finish();
+          }
+
         }
         function onWindowResize() {
           camera.aspect = window.innerWidth / window.innerHeight;
@@ -457,8 +490,10 @@
             postcodeInfo = res.data;
             var longConst = Math.abs(1280 / xspan);
             var latConst = Math.abs(1280 / yspan);
-            lat = lat - (yoffset);
-            long = long - (xoffset);
+            if (!rebuild) {
+              lat = lat - (yoffset);
+              long = long - (xoffset);
+            }
             group.add(mesh);
 
             var avg = postcodeInfo[0][0]["Average"];
@@ -489,16 +524,16 @@
             //for (var i = 0; i < 10; i++) {
 
             //TODO: These checks shouldn't be necessary as query.php should know exactly what data to spit out
-              if (postcodeInfo[1][i]["Latitude"] < (lat + (yspan / 2)) ) {
+              if (postcodeInfo[1][i]["latitude"] < (lat + (yspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[1][i]["Longitude"] > (long + (xspan / 2)) ) {
+              if (postcodeInfo[1][i]["longitude"] > (long + (xspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[1][i]["Latitude"] > (lat - (yspan / 2)) ) {
+              if (postcodeInfo[1][i]["latitude"] > (lat - (yspan / 2)) ) {
                 continue;
               }
-              if (postcodeInfo[1][i]["Longitude"] < (long - (xspan / 2)) ) {
+              if (postcodeInfo[1][i]["longitude"] < (long - (xspan / 2)) ) {
                 continue;
               }
 
@@ -525,7 +560,10 @@
                 gColor = 0.0;
               }
 
-              //alert(upperBound + " " + postcodeInfo[1][i]["Total"] + " " +  rColor + " " + gColor);
+
+              //alert(upperBound + " " + postcodeInfo[1][i]["Total"] + " " +  rColor + " " + gColor + " statType= " + modelType + " " + typeof modelType);
+
+
 
               var barColour = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
 
@@ -533,13 +571,19 @@
               barMaterial.opacity = 0.6;
 
               //from here
-              switch (modelType) {
-               case "0":
-                 barMaterial.color.setRGB(1, gColor, 0);
-                 break;
-               case "1":
-                 barMaterial.color.setRGB(1, 0 , gColor);
-                 break;
+              switch (modelType.toString()) {
+                case "0":
+                  barMaterial.color.setRGB(1, gColor, 0);
+                  break;
+                case "1":
+                  barMaterial.color.setRGB(1, 0 , gColor);
+                  break;
+                case "2":
+                  barMaterial.color.setRGB(gColor, 1, 0);
+                  break;
+                case "3":
+                  barMaterial.color.setRGB(0, 1, gColor);
+                  break;
               }
 
               //alert(barMaterial.color.getHexString());
@@ -559,12 +603,12 @@
                   barGeometry.faces[ z ].color = barMaterial.color;
               }
 
-              var xpos = ((((postcodeInfo[1][i]["Longitude"] - long ) ) * longConst));
+              var xpos = ((((postcodeInfo[1][i]["longitude"] - long ) ) * longConst));
               var ypos = (((postcodeInfo[1][i]["Total"] / upperBound) * 150) / 2);
-              var zpos = -((((postcodeInfo[1][i]["Latitude"] - lat ) ) * latConst));
+              var zpos = -((((postcodeInfo[1][i]["latitude"] - lat ) ) * latConst));
               barGeometry.translate(xpos,ypos,zpos);
 
-              meshes.push(barMesh);
+              //meshes.push(barMesh);
 
               mergedGeo.mergeMesh(barMesh);
 
