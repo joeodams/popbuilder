@@ -90,11 +90,15 @@
     {
       background-color:#ffffff;
       padding: 5px 12px;
+      margin: 20px 20px;
+      height: 20px;
+      display: inline-block;
     }
 
     input[type=radio]
     {
       display:none;
+      padding: 5px 12px;
     }
     input[type=radio]:checked + label
     {
@@ -106,10 +110,9 @@
       width: 100%;
       text-align: right;
       color: black;
-      top : 1;
     }
     .radiotext {
-      margin: 50px 50px 0px 0px;
+      margin: 0px 0px;
     }
 
     </style>
@@ -118,17 +121,6 @@
       <div id="cont" class="center" style="background-color:black;">
 
         <input type="text" id="inputajax" list="json-datalist" placeholder="Enter your postcode" ng-change="change(select)" ng-model="select" ng-trim="false">
-
-        <form>
-          <input type="radio" id="1" class="rad" name="name" value="0"/>
-          <label for="1">Population density</label>
-          <input type="radio" id="2" class="rad" name="name" value="1"/>
-          <label for="2">House prices</label>
-          <input type="radio" id="3" class="rad" name="name" value="2"/>
-          <label for="3">Crime</label>
-          <input type="radio" id="4" class="rad" name="name" value="3"/>
-          <label for="4">Unemployment</label>
-        </form>
 
         <datalist id="json-datalist"></datalist>
 
@@ -140,40 +132,7 @@
       </div>
 
       <div id="hud" >
-        <form>
-          <tr>
-            <td>
-              <div class = "radiotext">
-                <input type="radio" id="5" name="name1" value="3" ng-click="tFunction(0)"/>
-                <label for="5">Population density</label>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class = "radiotext">
-                <input type="radio" id="6" name="name1" value="4" ng-click="tFunction(1)"/>
-                <label for="6">House prices</label>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class = "radiotext">
-                <input type="radio" id="7" name="name1" value="5" ng-click="tFunction(2)"/>
-                <label for="7">Crime</label>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div class = "radiotext">
-                <input type="radio" id="8" name="name1" value="6" ng-click="tFunction(3)"/>
-                <label for="8">Unemployment</label>
-              </div>
-            </td>
-          </tr>
-        </form>
+
       </div>
 
       <div id="spin" class="spinner">
@@ -186,6 +145,63 @@
 
       var hud = document.getElementById('hud');
       hud.style.display = "none";
+
+      var dataTypes = ["Population density", "House prices", "Crime", "Unemployment","Test1"];
+
+      var hudFormNode = document.createElement("form");
+
+      for (var i = 0; i < dataTypes.length; i++) {
+        var trNode = document.createElement("TR");
+        var tdNode = document.createElement("TD");
+        var divNode = document.createElement("DIV");
+        divNode.classList.add("radiotext");
+        var input = document.createElement("input");
+        input.type = "radio";
+        input.id = i + 1 + dataTypes.length;
+        input.name = "name1";
+        input.value = i + 1 + dataTypes.length;
+        var label = document.createElement("label");
+        label.htmlFor = i + 1 + dataTypes.length;
+        var textNode = document.createTextNode(dataTypes[i]);
+        var att = document.createAttribute("ng-click");
+        att.value = "tFunction(" + i + ")";
+        input.setAttributeNode(att);
+
+        label.appendChild(textNode);
+        divNode.appendChild(input);
+        divNode.appendChild(label);
+        tdNode.appendChild(divNode);
+        trNode.appendChild(tdNode);
+
+        hudFormNode.appendChild(trNode);
+      }
+
+      hud.appendChild(hudFormNode);
+
+      var container = document.getElementById('cont');
+
+      containerFormNode = document.createElement("form");
+
+      for (var i = 0; i < dataTypes.length; i++) {
+        var input = document.createElement("input");
+        input.type = "radio";
+        input.id = i + 1;
+        input.class = "rad";
+        input.name = "name";
+        input.value = i.toString();
+
+        var label = document.createElement("label");
+        label.htmlFor = i + 1;
+        var textNode = document.createTextNode(dataTypes[i]);
+
+        label.appendChild(textNode);
+
+        containerFormNode.appendChild(input);
+        containerFormNode.appendChild(label);
+
+      }
+
+      container.appendChild(containerFormNode);
       </script>
       <script src="../tjs/build/three.js"></script>
       <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
@@ -194,9 +210,10 @@
 
       <!-- from here -->
       <script>
+
       var app = angular.module('test', []);
       var input = document.getElementById('inputajax');
-      var container = document.getElementById('cont');
+      //var container = document.getElementById('cont');
       var dataList = document.getElementById('json-datalist');
       var camera, scene, renderer;
       var mesh;
