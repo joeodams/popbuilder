@@ -69,6 +69,83 @@ switch ($type) {
     FROM temptable";
     break;
 
+  case 4:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, christian AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 5:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, buddhist AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 6:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, hindu AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 7:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, jewish AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 8:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, muslim AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 9:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, sihk AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 10:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, no_religion AS Total
+    FROM geodem.religion
+    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
 }
 
 $drop = "DROP TABLE temptable";
