@@ -14,11 +14,25 @@
       font-size:24px;
       text-align: center;
     }
+    .hudDiv {
+      width: 10%;
+    }
     .button {
       background-color: #111111;
       border: none;
-      width: 100%;
+      width: 25%;
       color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+    .containerButton {
+      background-color: white;
+      border: none;
+      width: 75%;
+      color: black;
       padding: 15px 32px;
       text-align: center;
       text-decoration: none;
@@ -27,12 +41,12 @@
     }
     .center {
       position: absolute;
-      left: 50%;
+
       top: 50%;
       text-align: center;
-      width:546px;
+      width:100%;
       height:265px;
-      margin-left: -273px; /*half width*/
+
       margin-top: -132px; /*half height*/
     }
 
@@ -115,6 +129,7 @@
       margin: 0px 0px;
     }
 
+
     </style>
     <body ng-controller="PostCtrl">
 
@@ -146,76 +161,155 @@
       var hud = document.getElementById('hud');
       hud.style.display = "none";
 
-      var dataTypes = ["Population density", "House prices", "Crime", "Unemployment","Christian population",
-      "Buddhist population","Hindu population","Jewish population","Muslims population","Sikh population","Non-religious population"];
+
+      function showHide(id) {
+          x = document.getElementById(id);
+
+          if (x.style.display === "none") {
+              x.style.display = "inline-block";
+          } else {
+              x.style.display = "none";
+          }
+      }
+
+      var dataTypes =
+      [
+
+      ["Population density", "House prices", "Crime", "Unemployment"],
+      ["Christian population","Buddhist population","Hindu population", "Jewish population","Muslims population","Sikh population","Non-religious population"]
+
+      ];
+
+      var dataCategories =
+      [
+        "Key statistics","Religion"
+      ]
+
+      var totalLength = 0;
+
+      for (var i = 0; i < dataTypes.length; i++) {
+        for (var x = 0; x < dataTypes[i].length; x++) {
+          totalLength++;
+        }
+      }
 
       var hudFormNode = document.createElement("form");
 
+      var row = 0;
       for (var i = 0; i < dataTypes.length; i++) {
-        var trNode = document.createElement("TR");
-        var tdNode = document.createElement("TD");
-        var divNode = document.createElement("DIV");
-        divNode.classList.add("radiotext");
-        var input = document.createElement("input");
-        input.type = "radio";
-        input.id = i + 1 + dataTypes.length;
-        input.name = "name1";
-        input.value = i + 1 + dataTypes.length;
-        var label = document.createElement("label");
-        label.htmlFor = i + 1 + dataTypes.length;
-        var textNode = document.createTextNode(dataTypes[i]);
-        var att = document.createAttribute("ng-click");
-        att.value = "tFunction(" + i + ")";
-        input.setAttributeNode(att);
+        
+        var button = document.createElement("BUTTON");
+        button.class = "containerButton";
 
-        label.appendChild(textNode);
-        divNode.appendChild(input);
-        divNode.appendChild(label);
-        tdNode.appendChild(divNode);
-        trNode.appendChild(tdNode);
+        var divHost = document.createElement("DIV");
+        divHost.id = "hudDiv" + i;
+        button.onclick = function () { showHide(divHost.id)};
+        divHost.class = "hudDiv";
+        divHost.style.float = "left";
+        hudFormNode.appendChild(divHost);
+        //alert(dataTypes[i].length)
+        for (var x = 0; x < dataTypes[i].length; x++) {
+          var trNode = document.createElement("TR");
+          var tdNode = document.createElement("TD");
+          var divNode = document.createElement("DIV");
+          divNode.classList.add("radiotext");
+          var input = document.createElement("input");
+          input.type = "radio";
+          input.id = row + 1 + totalLength;
+          input.name = "name1";
+          input.value = row + 1 + totalLength;
+          var label = document.createElement("label");
+          label.htmlFor = row + 1 + totalLength;
+          var textNode = document.createTextNode(dataTypes[i][x]);
+          var att = document.createAttribute("ng-click");
+          att.value = "tFunction(" + row + ")";
+          input.setAttributeNode(att);
 
-        hudFormNode.appendChild(trNode);
+          label.appendChild(textNode);
+          divNode.appendChild(input);
+          divNode.appendChild(label);
+          tdNode.appendChild(divNode);
+          trNode.appendChild(tdNode);
+
+          divHost.appendChild(trNode);
+          row++;
+        }
+        hudFormNode.appendChild(button);
+        hudFormNode.appendChild(divHost);
+
+        var onclick = document.createAttribute("onclick");
+        onclick.value = 'showHide("' + divHost.id +'")';
+        button.setAttributeNode(onclick);
+        button.className = "containerButton";
+        var buttonTextNode = document.createTextNode(dataCategories[i]);
+        button.appendChild(buttonTextNode);
       }
 
       hud.appendChild(hudFormNode);
 
       var container = document.getElementById('cont');
 
-      // var containerCollapseButton = document.createElement("button");
-      // containerCollapseButton.type = "button";
-      // containerCollapseButton.class = "contCol";
-      // var containerToggle = document.createAttribute("data-toggle");
-      // containerToggle.value = "collapse";
-      // var containerTarget = document.createAttribute("data-target");
-      // containerTarget.value = "#contForm"
-      //
-      // containerCollapseButton.setAttributeNode(containerToggle);
-      // containerCollapseButton.setAttributeNode(containerTarget);
-      //
-      // container.appendChild(containerCollapseButton);
-
       containerFormNode = document.createElement("form");
+      containerFormNode.id = "containerFormNode"
 
+      row = 0;
+      container.appendChild(containerFormNode);
       for (var i = 0; i < dataTypes.length; i++) {
-        var input = document.createElement("input");
-        input.type = "radio";
-        input.id = i + 1;
-        input.class = "rad";
-        input.name = "name";
-        input.value = i.toString();
 
-        var label = document.createElement("label");
-        label.htmlFor = i + 1;
-        var textNode = document.createTextNode(dataTypes[i]);
+        var superDiv = document.createElement("DIV");
 
-        label.appendChild(textNode);
+        var button = document.createElement("BUTTON");
 
-        containerFormNode.appendChild(input);
-        containerFormNode.appendChild(label);
+        var divHost = document.createElement("DIV");
+        var buttonHost = document.createElement("DIV");
+        buttonHost.id = "containerButtonHost" + i;
+        divHost.class = "hudDiv";
+        divHost.id = "containerDiv" + i;
 
+        buttonHost.appendChild(button);
+        buttonHost.style.width = "100%";
+        buttonHost.style.height = "15%";
+        buttonHost.style.margin = "0 auto";
+
+        divHost.style.width = "100%";
+        divHost.style.height = "100%";
+        divHost.style.margin = "0 auto";
+
+        for (var x = 0; x < dataTypes[i].length; x++) {
+          var input = document.createElement("input");
+          input.type = "radio";
+          input.id = row + 1;
+          input.class = "rad";
+          input.name = "name";
+          input.value = row.toString();
+          var label = document.createElement("label");
+          label.htmlFor = row + 1;
+          var textNode = document.createTextNode(dataTypes[i][x]);
+          label.appendChild(textNode);
+          divHost.appendChild(input);
+          divHost.appendChild(label);
+          row++;
+        }
+
+        superDiv.style.verticalAlign = "top";
+        superDiv.style.display = "inline-block";
+        superDiv.style.width = "15%";
+        superDiv.style.height = "100%";
+        superDiv.appendChild(buttonHost);
+        superDiv.appendChild(divHost);
+
+        containerFormNode.appendChild(superDiv);
+        //containerFormNode.insertBefore(buttonHost,containerFormNode.childNodes[i]);
+
+        var onclick = document.createAttribute("onclick");
+        onclick.value = 'showHide("' + divHost.id +'")';
+        button.setAttributeNode(onclick);
+        button.className = "containerButton";
+        var buttonTextNode = document.createTextNode(dataCategories[i]);
+        button.appendChild(buttonTextNode);
       }
 
-      container.appendChild(containerFormNode);
+
       </script>
       <script src="../tjs/build/three.js"></script>
       <script src="../tjs/examples/js/controls/OrbitControls.js"></script>
