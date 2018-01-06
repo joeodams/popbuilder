@@ -1,12 +1,18 @@
 <?php
 $postdata = file_get_contents("php://input");
 
-$coord = json_decode($postdata,true);
 
+$coord = json_decode($postdata,true);
 $type = $coord["type"];
 
 $lat = $coord["loc"][0];
 $long = $coord["loc"][1];
+
+
+$xtop = $coord["bounds"]["xtop"];
+$xbottom = $coord["bounds"]["xbottom"];
+$ytop = $coord["bounds"]["ytop"];
+$ybottom = $coord["bounds"]["ybottom"];
 
 $servername = "localhost";
 $username = "root";
@@ -28,7 +34,7 @@ switch ($type) {
   case 0:
     $init = "CREATE TABLE temptable AS (SELECT Postcode, latitude, longitude, Total
     FROM geodem.populations
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -39,7 +45,7 @@ switch ($type) {
   case 1:
     $init = "CREATE TABLE temptable AS (SELECT pcd_fix, latitude, longitude, Total
     FROM geodem.house_prices
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -50,7 +56,7 @@ switch ($type) {
   case 2:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, Total
     FROM geodem.crimes
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -61,7 +67,7 @@ switch ($type) {
   case 3:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, unemployed_adults AS Total
     FROM geodem.unemployment
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -72,7 +78,7 @@ switch ($type) {
   case 4:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, christian AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -83,7 +89,7 @@ switch ($type) {
   case 5:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, buddhist AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -94,7 +100,7 @@ switch ($type) {
   case 6:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, hindu AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -105,7 +111,7 @@ switch ($type) {
   case 7:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, jewish AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -116,7 +122,7 @@ switch ($type) {
   case 8:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, muslim AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -127,7 +133,7 @@ switch ($type) {
   case 9:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, sihk AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
@@ -138,7 +144,7 @@ switch ($type) {
   case 10:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, no_religion AS Total
     FROM geodem.religion
-    WHERE latitude BETWEEN ($lat - 0.2) AND ($lat + 0.2) AND longitude BETWEEN ($long - 0.2) AND ($long + 0.2))";
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
 
