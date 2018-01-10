@@ -3,7 +3,7 @@
     <style>
       body {background-color: black;}
       input[type=text] {
-      width: 100%;
+      width: 20%;
       height: 100px;
       padding: 12px 20px;
       margin: 8px 0;
@@ -18,16 +18,47 @@
       width: 10%;
     }
     .button {
-      background-color: #111111;
-      border: none;
-      width: 25%;
-      color: white;
-      padding: 15px 32px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
+      -moz-box-shadow:inset 0px -3px 7px 0px #29bbff;
+    	-webkit-box-shadow:inset 0px -3px 7px 0px #29bbff;
+    	box-shadow:inset 0px -3px 7px 0px #29bbff;
+    	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #2dabf9), color-stop(1, #0688fa));
+    	background:-moz-linear-gradient(top, #2dabf9 5%, #0688fa 100%);
+    	background:-webkit-linear-gradient(top, #2dabf9 5%, #0688fa 100%);
+    	background:-o-linear-gradient(top, #2dabf9 5%, #0688fa 100%);
+    	background:-ms-linear-gradient(top, #2dabf9 5%, #0688fa 100%);
+    	background:linear-gradient(to bottom, #2dabf9 5%, #0688fa 100%);
+    	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#2dabf9', endColorstr='#0688fa',GradientType=0);
+    	background-color:#2dabf9;
+    	-moz-border-radius:3px;
+    	-webkit-border-radius:3px;
+    	border-radius:3px;
+    	border:1px solid #0b0e07;
+    	display:inline-block;
+    	cursor:pointer;
+    	color:#ffffff;
+    	font-family:Arial;
+    	font-size:15px;
+    	padding:9px 23px;
+    	text-decoration:none;
+    	text-shadow:0px 1px 0px #263666;
+      margin: 35px;
+      width: 10%;
     }
+    .button:hover {
+    	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0688fa), color-stop(1, #2dabf9));
+    	background:-moz-linear-gradient(top, #0688fa 5%, #2dabf9 100%);
+    	background:-webkit-linear-gradient(top, #0688fa 5%, #2dabf9 100%);
+    	background:-o-linear-gradient(top, #0688fa 5%, #2dabf9 100%);
+    	background:-ms-linear-gradient(top, #0688fa 5%, #2dabf9 100%);
+    	background:linear-gradient(to bottom, #0688fa 5%, #2dabf9 100%);
+    	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#0688fa', endColorstr='#2dabf9',GradientType=0);
+    	background-color:#0688fa;
+    }
+    .button:active {
+    	position:relative;
+    	top:1px;
+    }
+
     .containerButton {
       background-color: white;
       border: none;
@@ -42,7 +73,7 @@
     .center {
       position: absolute;
 
-      top: 50%;
+      top: 35%;
       text-align: center;
       width:100%;
       height:265px;
@@ -137,12 +168,13 @@
       <div id="cont" class="center" style="background-color:black;">
 
         <div class="ui-widget">
-          <input type="text" id="postcodeBox" placeholder="Enter your postcode" onkeydown="changeOptions()">
+          <input type="text" id="postcodeBox" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter a postcode'" placeholder="Enter a postcode"  onkeydown="changeOptions()">
         </div>
 
-        <button onclick="prep()" class="button">Submit</button>
+        <button onclick="checkValidPostcode()" class="button" id="submitButton">Generate</button>
 
       </div>
+
       <div hidden>
             <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
       </div>
@@ -335,6 +367,11 @@
         button.appendChild(buttonTextNode);
       }
 
+      for (var i = 0; i < dataCategories.length; i++) {
+        showHide('containerDiv' + i, 0);
+      }
+      var s = document.forms[0];
+      s[1].checked = true;
 
       </script>
       <script src="../tjs/build/three.js"></script>
@@ -368,6 +405,7 @@
       var statType;
       var postcodeForwardType = [];
       var idToCheck = 0;
+      var valid = false;
 
       //var mergedGeo;
 
@@ -377,8 +415,54 @@
           prep();
         }
 
-        var prep = function() {
+        function checkValidPostcode() {
+          var pcd = document.getElementById('postcodeBox').value;
+          $.ajax({
+            type: 'GET',
+            url: 'http://api.postcodes.io/postcodes/' + pcd + '/validate'
+          }).then(function(response) {
+            if (response.result) {
+              valid = true;
+              prep();
+            }
+            else {
+              clearInvalidDiv();
+              var submitButton = document.getElementById('submitButton');
+
+              var newNode = document.createElement('div');
+              var t = document.createTextNode("Oops, looks like that's not a valid postcode. Please try a different postcode.")
+
+              newNode.style.color = 'red';
+              newNode.style.fontFamily = 'Verdana';
+              newNode.style.padding = '10px';
+              newNode.id = 'invalidDiv';
+
+              newNode.appendChild(t);
+
+              submitButton.parentNode.insertBefore(newNode, submitButton.nextSibling);
+              valid = false;
+            }
+          });
+        }
+
+        function clearInvalidDiv()
+        {
+          var inv = document.getElementById('invalidDiv');
+          $(inv).contents().filter(function () {
+               return this.nodeType === 3;
+          }).remove();
+        }
+
+        function prep() {
+
+          clearInvalidDiv();
+
           var val = input.value;
+
+          if (!valid) {
+            return;
+          }
+
           spi.style.display = "block";
           container.style.display = "none";
 
@@ -603,6 +687,8 @@
 
           var elapsedTime;
           if (firstFrame == true) {
+            camera.position.x = 0;
+            camera.position.y = 0;
             scene.scale.y = 0.1;
             firstFrame = false;
             elapsedTime = 0;
@@ -617,12 +703,12 @@
 
             scene.scale.y += 0.01;
 
-
-            mesh.scale.y = 1;
+            //alert(typeof group[0]);
+            group.scale.y = 1;
           }
 
           if (scene.scale.y < 0.5) {
-            camera.position.x += 10;
+            camera.position.x += 25;
             camera.position.y += 10;
             camera.lookAt(mesh.position);
           }
