@@ -159,6 +159,8 @@
     .radiotext {
       margin: 0px 0px;
     }
+    #hudPostcodeBox:valid { text-transform: uppercase; }
+    #postcodeBox:valid { text-transform: uppercase; }
 
     </style>
     <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
@@ -168,7 +170,7 @@
       <div id="cont" class="center" style="background-color:black;">
 
         <div class="ui-widget">
-          <input type="text" id="postcodeBox" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter a postcode'" placeholder="Enter a postcode"  onkeydown="changeOptions()">
+          <input type="text" id="postcodeBox" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter a postcode'" placeholder="Enter a postcode" required="required">
         </div>
 
         <button onclick="checkValidPostcode()" class="button" id="submitButton">Generate</button>
@@ -179,10 +181,20 @@
             <canvas id="myCanvas" width="1280" height="1280" crossOrigin="anonymous"></canvas>
       </div>
 
-      <div id="hud" >
-        <div style="text-align: left; color: white;">
-          <input type="text" id="hudPostcodeBox" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter a postcode'" placeholder="Enter a postcode"  onkeydown="changeOptions()" style="z-index: 1;">
-          <button onclick="checkValidPostcode()" class="button" id="hudSubmitButton">Generate</button>
+      <div id="hud" onclick="hudPostcodeBoxClick()">
+        <div style="text-align: left; color: white; float: left; width: 15%;">
+          <table>
+            <tr>
+              <td>
+                <input type="text" id="hudPostcodeBox" onclick="this.focus();" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter a postcode'" placeholder="Enter a postcode"  required="required" style="z-index: 1; font-size: 1em;width:100%; padding: 0px; margin: 0px; ">
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <button onclick="initialiseNewPostcode()" class="button" id="hudSubmitButton" style="width: 100%; margin: 0px">Generate</button>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
 
@@ -191,6 +203,25 @@
         <div class="double-bounce2"></div>
       </div>
       <script>
+      document.addEventListener("click", hudPostcodeBoxClick);
+      function hudPostcodeBoxClick(event)
+      {
+        if (event == undefined) {
+          return;
+        }
+        var x = event.clientX;
+        var y = event.clientY;
+        var elementMouseIsOver = document.elementFromPoint(x, y);
+        var idOfElement = elementMouseIsOver.id;
+        if (idOfElement == 'hudPostcodeBox') {
+          elementMouseIsOver.focus();
+        }
+        else{
+          document.getElementById('hudPostcodeBox').blur();
+        }
+      }
+
+
       var spi = document.getElementById('spin');
       spi.style.display = "none";
 
@@ -221,7 +252,7 @@
       var dataTypes =
       [
 
-      ["Population density", "House prices", "Crime", "Unemployment"],
+      ["Population density", "House prices", "Crime", "Unemployment", "Median age"],
       ["Christianity","Buddhism","Hinduism", "Judaism","Islam","Sikhism","Non-religious"]
 
       ];
@@ -240,6 +271,7 @@
       }
 
       var hudFormNode = document.createElement("form");
+      hudFormNode.style = "float: right; width: 50%;"
 
       var row = 0;
       for (var i = 0; i < dataTypes.length; i++) {
@@ -415,6 +447,7 @@
       var lookat;
       var maxHeight = 0;
       var animationHeight;
+      var newPostcode = false;
 
       //var mergedGeo;
 
@@ -424,8 +457,38 @@
           prep();
         }
 
+        function initialiseNewPostcode() {
+          var pcd = document.getElementById('postcodeBox');
+          var hudBox = document.getElementById('hudPostcodeBox');
+          pcd.value = hudBox.value;
+
+          mergedGeo.dispose();
+          mesh.geometry.dispose();
+
+          for (var i = 0; i < mesh.material.length; i++) {
+            mesh.material[i].dispose();
+            mesh.material[i].map.dispose();
+          }
+
+
+          while (scene.children.length > 0) {
+            scene.remove(scene.children[0]);
+          }
+
+          renderer.dispose();
+          cancelAnimationFrame(id);
+          newPostcode = true;
+
+          checkValidPostcode();
+        }
+
+
         function checkValidPostcode() {
           var pcd = document.getElementById('postcodeBox').value;
+          if (checkNI(pcd) || checkScotland(pcd)) {
+            displayNoServiceDiv();
+            return;
+          }
           $.ajax({
             type: 'GET',
             url: 'http://api.postcodes.io/postcodes/' + pcd + '/validate'
@@ -462,6 +525,30 @@
           });
         }
 
+        function displayNoServiceDiv() {
+          clearInvalidDiv();
+          var submitButton = document.getElementById('submitButton');
+
+          if (document.getElementById('invalidDiv') != undefined) {
+            var t = document.createTextNode("Sorry, we currently do not hold data for Scotland or Northern Ireland.")
+            document.getElementById('invalidDiv').appendChild(t);
+            return;
+          }
+
+          var newNode = document.createElement('div');
+          var t = document.createTextNode("Sorry, we currently do not hold data for Scotland or Northern Ireland.")
+
+          newNode.style.color = 'red';
+          newNode.style.fontFamily = 'Verdana';
+          newNode.style.padding = '10px';
+          newNode.id = 'invalidDiv';
+
+          newNode.appendChild(t);
+
+          submitButton.parentNode.insertBefore(newNode, submitButton.nextSibling);
+
+        }
+
         function clearInvalidDiv()
         {
           var inv = document.getElementById('invalidDiv');
@@ -471,7 +558,6 @@
         }
 
         function prep() {
-
 
           clearInvalidDiv();
 
@@ -489,8 +575,7 @@
           container.style.display = "none";
 
           rebuild = false;
-
-          if (typeof scene != 'undefined') {
+          if (typeof scene != 'undefined' && newPostcode == false) {
             rebuild = true;
             mergedGeo.dispose();
             mesh.geometry.dispose();
@@ -546,10 +631,15 @@
               data: val,
               headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).then(function(response) {
+              //newPostcode false here
               console.log(response);
 
               // Turn the response string into an array
               response = JSON.parse(response);
+
+              if (newPostcode) {
+                pngNames = [];
+              }
 
               for (var i = 0; i < 25; i++) {
                 pngNames.push(response[i]);
@@ -574,7 +664,10 @@
 
               coords = [lat,long];
               var ctx=c.getContext("2d");
-              //NEEDS REFACTORING
+
+              if (newPostcode) {
+                ctx.clearRect(0, 0, 1280, 1280);
+              }
               var imageObjs = [];
 
               var yt = 0;
@@ -595,7 +688,6 @@
               for (var i = 0; i < 25; i++) {
                 displayTile(i);
               }
-
               function displayTile(tileNumber) {
                 var img = new Image();
 
@@ -679,6 +771,13 @@
               $("#myText").val("").css("display", 2);
             }
           });
+
+          $( "#hudPostcodeBox" ).autocomplete({
+            source: getPostcodes,
+            change: function() {
+              $("#myText").val("").css("display", 2);
+            }
+          });
         });
 
 
@@ -706,28 +805,30 @@
           else {
 
             buildModel(statType);
+            if (!newPostcode) {
+              camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
+              camera.position.set(0,0,800);
+              scene = new THREE.Scene();
+              scene.translateY(-200);
+              renderer = new THREE.WebGLRenderer({ alpha: true });
+              renderer.setPixelRatio( window.devicePixelRatio );
+              renderer.setSize( window.innerWidth, window.innerHeight );
+              document.body.appendChild( renderer.domElement );
+              window.addEventListener( 'resize', onWindowResize, false );
+              var orbit = new THREE.OrbitControls( camera  );
+              //orbit.target = new THREE.Vector3(0,0,0);
+              // orbit.maxPolarAngle = Math.PI * 0.5;
+              // orbit.minDistance = 1000;
+              // orbit.maxDistance = 5000;
+              orbit.update();
+              //console.log(mesh.matrix);
+              scene.background = new THREE.Color( 0x000000 );
 
-            camera = new THREE.PerspectiveCamera( 70, window.pnginnerWidth / window.innerHeight, 1, 10000 );
-            camera.position.set(0,0,800);
-            scene = new THREE.Scene();
-            scene.translateY(-200);
-            renderer = new THREE.WebGLRenderer({ alpha: true });
-            renderer.setPixelRatio( window.devicePixelRatio );
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            document.body.appendChild( renderer.domElement );
-            window.addEventListener( 'resize', onWindowResize, false );
-            var orbit = new THREE.OrbitControls( camera  );
-            //orbit.target = new THREE.Vector3(0,0,0);
-            orbit.maxPolarAngle = Math.PI * 0.5;
-            orbit.minDistance = 1000;
-            orbit.maxDistance = 5000;
-            orbit.update();
-            //console.log(mesh.matrix);
-            scene.background = new THREE.Color( 0x000000 );
+              window.addEventListener( 'mousemove', onMouseMove, false );
 
-            window.addEventListener( 'mousemove', onMouseMove, false );
-
-            window.requestAnimationFrame(render);
+              window.requestAnimationFrame(render);
+            }
+            newPostcode = false;
             finish();
           }
 
@@ -836,10 +937,11 @@
               var barGeometry = new THREE.BoxGeometry( 2, barHeight , 2 );
               var barMaterial 	= new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
       				var barMesh	= new THREE.Mesh( barGeometry );
+
               var rColor, gColor;
 
               if (postcodeInfo[1][i]["Total"] < upperBound) {
-                rColor = postcodeInfo[1][i]["Total"] / upperBound;
+                rColor = (postcodeInfo[1][i]["Total"] / upperBound);
               }
               else {
                 rColor = 1.0;
@@ -851,50 +953,15 @@
                 gColor = 0.0;
               }
 
-              var barColour = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
+              // rColor = 0.5;
+              // gColor = 0.5;
 
+              var barColor = calculateColour(rColor, gColor, modelType);
               barMaterial.transparent = true;
               barMaterial.opacity = 0.6;
 
-              //from here
-              switch (modelType.toString()) {
-                case "0":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "1":
-                  barMaterial.color.setRGB(1, 0 , gColor);
-                  break;
-                case "2":
-                  barMaterial.color.setRGB(gColor, 1, 0);
-                  break;
-                case "3":
-                  barMaterial.color.setRGB(0, 1, gColor);
-                  break
-                case "4":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "5":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "6":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "7":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "8":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "9":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-                case "10":
-                  barMaterial.color.setRGB(1, gColor, 0);
-                  break;
-              }
-
               for ( var z = 0; z < barGeometry.faces.length; z ++ ) {
-                  barGeometry.faces[ z ].color = barMaterial.color;
+                  barGeometry.faces[ z ].color = barColor;
               }
 
               var xpos = ((((postcodeInfo[1][i]["longitude"] - long ) ) * longConst));
@@ -921,6 +988,123 @@
 
           });
         }
+
+        function calculateColour(rColor, gColor, modelType) {
+
+          var barColor;
+          // Default
+          barColor = new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + ",0)");
+
+
+          switch (modelType.toString()) {
+            case "0":
+              barColor = getThreeColor(rColor, gColor, 0);
+              break;
+            case "1":
+              barColor = getThreeColor(1, 0 , gColor);
+              break;
+            case "2":
+              barColor = getThreeColor(gColor, 1, 0);
+              break;
+            case "3":
+              barColor = getThreeColor(0, 1, gColor);
+              break
+            case "4":
+              barColor = getThreeColor(rColor, gColor, 0);
+              break;
+            case "5":
+              barColor = getThreeColor(1, gColor, 0);
+              break;
+              // case "6":
+              //   barColor = getThreeColor(1, gColor, 0);
+              //   break;
+              // case "7":
+              //   barColor = getThreeColor(1, gColor, 0);
+              //   break;
+              // case "8":
+              //   barColor = getThreeColor(1, gColor, 0);
+              //   break;
+              // case "9":
+              //   barColor = getThreeColor(1, gColor, 0);
+              //   break;
+              // case "10":
+              //   barColor = getThreeColor(1, gColor, 0);
+              //   break;
+          }
+
+          return barColor;
+        }
+
+        function getThreeColor(rColor, gColor, bColor) {
+          return new THREE.Color("rgb(" + Math.round(255 * rColor) + "," + Math.round(255 * gColor) + "," + Math.round(255 * bColor) + ")");
+        }
+
+
+        function checkNI(postcode) {
+          if (postcode.substring(0,2) == 'BT') {
+            return true;
+          }
+          return false;
+        }
+
+        function checkScotland(postcode) {
+          var firstTwoCharacters = postcode.substring(0,2);
+
+          if (firstTwoCharacters.substring(0,1) == 'G' && isNumber(firstTwoCharacters.substring(1,1))) {
+            return true;
+          }
+          if (firstTwoCharacters == 'AB') {
+            return true;
+          }
+          if (firstTwoCharacters == 'DD') {
+            return true;
+          }
+          if (firstTwoCharacters == 'DG') {
+            return true;
+          }
+          if (firstTwoCharacters == 'EH') {
+            return true;
+          }
+          if (firstTwoCharacters == 'FK') {
+            return true;
+          }
+          if (firstTwoCharacters == 'HS') {
+            return true;
+          }
+          if (firstTwoCharacters == 'IV') {
+            return true;
+          }
+          if (firstTwoCharacters == 'KA') {
+            return true;
+          }
+          if (firstTwoCharacters == 'KW') {
+            return true;
+          }
+          if (firstTwoCharacters == 'KY') {
+            return true;
+          }
+          if (firstTwoCharacters == 'ML') {
+            return true;
+          }
+          if (firstTwoCharacters == 'PA') {
+            return true;
+          }
+          if (firstTwoCharacters == 'PH') {
+            return true;
+          }
+          if (firstTwoCharacters == 'TD') {
+            return true;
+          }
+          if (firstTwoCharacters == 'ZE') {
+            return true;
+          }
+          return false;
+        }
+
+        function isNumber(n) {
+          return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
         function finish() {
 
           $.ajax({
@@ -936,12 +1120,14 @@
         }
         // option #1 with ng-change="change()"
 
-        var changeOptions = function()
+        var changeOptions = function(elementId)
         {
-          setTimeout(function(){
-            var inp = document.getElementById('postcodeBox');
-            inp.value = inp.value.toUpperCase();
-          }, 1);
+          var inp = document.getElementById(elementId);
+          inp.value = inp.value.toUpperCase();
+          // setTimeout(function(){
+          //   var inp = document.getElementById(elementId);
+          //   inp.value = inp.value.toUpperCase();
+          // }, 1);
 
         }
       </script>

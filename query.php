@@ -15,12 +15,12 @@ $ytop = $coord["bounds"]["ytop"];
 $ybottom = $coord["bounds"]["ybottom"];
 
 $servername = "localhost";
-$username = "root";
-$password = " ";
+$username = "jodams";
+$password = "changeme";
 $dbname = "geodem";
 
 // Create connection
-$conn = new mysqli($servername, $username);
+$conn = new mysqli($servername, $username, $password);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -65,7 +65,7 @@ switch ($type) {
     break;
 
   case 3:
-    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, unemployed_adults AS Total
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, rate AS Total
     FROM geodem.unemployment
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
@@ -75,7 +75,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 4:
+  case 5:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, christian AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -86,7 +86,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 5:
+  case 6:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, buddhist AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -97,7 +97,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 6:
+  case 7:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, hindu AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -108,7 +108,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 7:
+  case 8:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, jewish AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -119,7 +119,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 8:
+  case 9:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, muslim AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -130,7 +130,7 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 9:
+  case 10:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, sihk AS Total
     FROM geodem.religion
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
@@ -141,9 +141,20 @@ switch ($type) {
     FROM temptable";
     break;
 
-  case 10:
+  case 11:
     $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, no_religion AS Total
     FROM geodem.religion
+    WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
+
+    $sql = "SELECT * FROM temptable";
+
+    $maxsql = "SELECT AVG(Total) AS Average, STDDEV(Total) AS Stddev,MAX(Total) AS Maximum
+    FROM temptable";
+    break;
+
+  case 4:
+    $init = "CREATE TABLE temptable AS (SELECT latitude, longitude, median^5 AS Total
+    FROM geodem.age
     WHERE latitude BETWEEN ($ybottom) AND ($ytop) AND longitude BETWEEN ($xbottom) AND ($xtop))";
 
     $sql = "SELECT * FROM temptable";
