@@ -174,12 +174,12 @@ if (!$result = $conn->query($init)) {
 
     // Again, do not do this on a public site, but we'll show you how
     // to get the error information
-    echo $conn->host_info . "\n";
-    echo $username . "\n";
-    echo "Error: Our query failed to execute and here is why: \n";
-    echo "Query: " . $sql . "\n";
-    echo "Errno: " . $conn->errno . "\n";
-    echo "Error: " . $conn->error . "\n";
+    // echo $conn->host_info . "\n";
+    // echo $username . "\n";
+    // echo "Error: Our query failed to execute and here is why: \n";
+    // echo "Query: " . $sql . "\n";
+    // echo "Errno: " . $conn->errno . "\n";
+    // echo "Error: " . $conn->error . "\n";
     exit;
 }
 

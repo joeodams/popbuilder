@@ -1,6 +1,21 @@
 <meta charset="UTF-8">
 <html lang="en">
     <style>
+
+
+    /*table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }*/
+    .hudTable {
+      border-collapse: collapse;
+
+      border-radius:10px;
+    }
+    .hudTable td, th {
+        border: 1px solid #848383;
+    }
       body {background-color: black;}
       input[type=text] {
       width: 20%;
@@ -133,9 +148,8 @@
     }
     label
     {
-      background-color:#ffffff;
-      padding: 5px 12px;
-      margin: 20px 20px;
+      background-color:#b4b4b4;
+      /*padding: 5px 12px;*/
       height: 20px;
       display: inline-block;
     }
@@ -143,7 +157,7 @@
     input[type=radio]
     {
       display:none;
-      padding: 5px 12px;
+      /*padding: 5px 12px;*/
     }
     input[type=radio]:checked + label
     {
@@ -287,13 +301,24 @@
         divHost.class = "hudDiv";
         divHost.style.display = "inline-block";
         divHost.style.margin = "0 auto";
+        divHost.style.width = "100%";
+
+        var hudTable = document.createElement("TABLE");
+        hudTable.className = "hudTable";
+        hudTable.style.textAlign = "center";
+        hudTable.style.width = "100%";
+
         hudFormNode.appendChild(divHost);
+        divHost.appendChild(hudTable);
         //alert(dataTypes[i].length)
         for (var x = 0; x < dataTypes[i].length; x++) {
           var trNode = document.createElement("TR");
+          trNode.style.width = "100%";
           var tdNode = document.createElement("TD");
+          tdNode.style.width = "100%";
           var divNode = document.createElement("DIV");
           divNode.classList.add("radiotext");
+          divNode.style.width = "100%";
           var input = document.createElement("input");
           input.type = "radio";
           input.id = row + 1 + totalLength;
@@ -301,6 +326,7 @@
           input.value = row + 1 + totalLength;
           var label = document.createElement("label");
           label.htmlFor = row + 1 + totalLength;
+          label.style.width = "100%";
           var textNode = document.createTextNode(dataTypes[i][x]);
           var att = document.createAttribute("onclick");
           //att.value = "tFunction(" + row + "," + input.id + ")";
@@ -313,13 +339,13 @@
           tdNode.appendChild(divNode);
           trNode.appendChild(tdNode);
 
-          divHost.appendChild(trNode);
+          hudTable.appendChild(trNode);
           row++;
         }
 
         superDiv.style.verticalAlign = "top";
         superDiv.style.display = "inline-block";
-        superDiv.style.width = "214";
+        superDiv.style.width = "25%";
         superDiv.style.height = "100%";
         superDiv.style.textAlign = "center";
         superDiv.appendChild(button);
